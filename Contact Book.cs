@@ -18,24 +18,24 @@ namespace ContactBook
         string FilePath = "file.contact";
         int CollapsedPanelHeight;
         int BlockPosition;
-        int BlockSize = 1 + 20 + 20 + 20 + 10 + 18;
+        int BlockSize = Record.BlockSize;
+
         bool Add0_Edit1;
         int Maximum;
         FileStream fileStream;
-        //BinaryWriter writer;
-        //BinaryReader reader;
+
         public ContactBook()
         {
             InitializeComponent();
-            CollapsedPanelHeight = this.splitContainer.Panel2.Height;
-            this.Height -= CollapsedPanelHeight;
-            this.splitContainer.Panel2Collapsed = true;
+            CollapsedPanelHeight = splitContainer.Panel2.Height;
+            Height -= CollapsedPanelHeight;
+            splitContainer.Panel2Collapsed = true;
 
             fileStream = new FileStream(FilePath, FileMode.OpenOrCreate);
 
             fileStream.Position = 0;
 
-            while (fileStream.Read(new byte[BlockSize], 0, BlockSize) > 0)
+            while (fileStream.Read(new byte[BlockSize], 0, BlockSize) >= BlockSize)
             {
                 Maximum++;
             }
@@ -52,40 +52,42 @@ namespace ContactBook
             }
 
         }
-
+        //---------- LABEL CLICKS ----------//
         private void firstName_label_Click(object sender, EventArgs e)
         {
-            this.firstName_box.Focus();
+            firstName_box.Focus();
         }
         private void lastName_label_Click(object sender, EventArgs e)
         {
-            this.firstName_box.Focus();
+            firstName_box.Focus();
         }
         private void middleName_label_Click(object sender, EventArgs e)
         {
-            this.firstName_box.Focus();
+            firstName_box.Focus();
         }
         private void birthDate_label_Click(object sender, EventArgs e)
         {
-            this.birthDate_box.Focus();
+            birthDatePicker_box.Focus();
         }
         private void phoneNumber_label_Click(object sender, EventArgs e)
         {
-            this.phoneNumber_box.Focus();
+            phoneNumber_box.Focus();
         }
+
+        //---------- BUTTON CLICKS ----------//
         private void search_button_Click(object sender, EventArgs e)
         {
-            if (this.splitContainer.Panel2Collapsed)
+            if (splitContainer.Panel2Collapsed)
             {
-                this.splitContainer.Panel2Collapsed = false;
-                this.Height += CollapsedPanelHeight;
-                this.search_button.Text = "Поиск ▼";
+                splitContainer.Panel2Collapsed = false;
+                Height += CollapsedPanelHeight;
+                search_button.Text = "Поиск ▼";
             }
             else
             {
-                this.splitContainer.Panel2Collapsed = true;
-                this.Height -= CollapsedPanelHeight;
-                this.search_button.Text = "Поиск ▲";
+                splitContainer.Panel2Collapsed = true;
+                Height -= CollapsedPanelHeight;
+                search_button.Text = "Поиск ▲";
             }
         }
         private void add_button_Click(object sender, EventArgs e)
@@ -96,12 +98,7 @@ namespace ContactBook
         {
             Add0_Edit1 = true;
 
-            switchButtons(true);
-
-            foreach (Control control in this.textBox_panel.Controls)
-            {
-                control.Enabled = true;
-            }
+            editMode(true);
         }
         private void ok_button_Click(object sender, EventArgs e)
         {
@@ -110,32 +107,35 @@ namespace ContactBook
             /////////////////
 
             Record record = new Record(
-                this.firstName_box.Text.ToCharArray(),
-                this.lastName_box.Text.ToCharArray(),
-                this.middleName_box.Text.ToCharArray(),
-                this.birthDate_box.Text.ToCharArray(),
-                this.phoneNumber_box.Text.ToCharArray());
-
-            fileStream.Position = BlockPosition * BlockSize;
-            fileStream.Write(record.Serialize2Byte(), 0, BlockSize);
-            fileStream.Flush();
+                firstName_box.Text.ToCharArray(),
+                lastName_box.Text.ToCharArray(),
+                middleName_box.Text.ToCharArray(),
+                birthDatePicker_box.Text.ToCharArray(),
+                phoneNumber_box.Text.ToCharArray());
 
             if (!Add0_Edit1)
-                Maximum++;
-
-            foreach (Control control in this.textBox_panel.Controls)
             {
-                control.Enabled = false;
+                BlockPosition = Maximum;
+                fileStream.Position = BlockPosition * BlockSize;
+                Maximum++;
             }
-            switchButtons(false);
+
+            fileStream.Position = BlockPosition * BlockSize;
+            byte[] bytes = record.Serialize2Byte();
+            fileStream.Write(bytes, 0, BlockSize);
+            fileStream.Flush();
+
+            editMode(false);
+
+            updateBoxes();
         }
         private void cancel_button_Click(object sender, EventArgs e)
         {
-            foreach (Control control in this.textBox_panel.Controls)
+            foreach (Control control in textBox_panel.Controls)
             {
                 control.Enabled = false;
             }
-            switchButtons(false);
+            editMode(false);
             updateBoxes();
         }
         private void delete_button_Click(object sender, EventArgs e)
@@ -143,6 +143,8 @@ namespace ContactBook
             fileStream.Position = BlockPosition * BlockSize;
             fileStream.WriteByte(1);
             fileStream.Flush();
+            BlockPosition += BlockPosition == 0 ? +1 : -1;
+            updateBoxes();
         }
         private void firstPosition_button_Click(object sender, EventArgs e)
         {
@@ -215,17 +217,19 @@ namespace ContactBook
             updateBoxes();
         }
 
+        //---------- SOME USEFUL FUNCTIONS ----------//
         private void updateBoxes()
         {
             byte[] block = new byte[BlockSize];
             fileStream.Position = BlockPosition * BlockSize;
             fileStream.Read(block, 0, BlockSize);
             Record record = new Record(block);
-            this.firstName_box.Text = new string(record.firstName);
-            this.lastName_box.Text = new string(record.lastName);
-            this.middleName_box.Text = new string(record.middleName);
-            this.birthDate_box.Text = new string(record.birthDate);
-            this.phoneNumber_box.Text = new string(record.phoneNumber);
+            firstName_box.Text = new string(record.firstName);
+            lastName_box.Text = new string(record.lastName);
+            middleName_box.Text = new string(record.middleName);
+            birthDatePicker_box.Text = new string(record.birthDate);
+            birthDateMasked_box.Text = new string(record.birthDate);
+            phoneNumber_box.Text = new string(record.phoneNumber);
         }
 
         // OLD
@@ -252,9 +256,9 @@ namespace ContactBook
         {
             Add0_Edit1 = false;
 
-            switchButtons(true);
+            editMode(true);
 
-            foreach (Control control in this.textBox_panel.Controls)
+            foreach (Control control in textBox_panel.Controls)
             {
                 control.Enabled = true;
                 if (control is TextBox textBox)
@@ -264,35 +268,39 @@ namespace ContactBook
                 if (control is DateTimePicker dateTimePicker)
                     dateTimePicker.Value = DateTime.Now;
             }
-            //findBlock();
-            BlockPosition = Maximum;
-            fileStream.Position = BlockPosition * BlockSize;
+            
+            //   MOVED TO ok_button_Click()   //
+            
+            //BlockPosition = Maximum;
+            //fileStream.Position = BlockPosition * BlockSize;
         }
-        private void switchButtons(bool isEditModeOn)
+        private void editMode(bool isEditModeOn)
         {
-            if (isEditModeOn)
+            add_button.Enabled = !isEditModeOn;
+            edit_button.Enabled = !isEditModeOn;
+            delete_button.Enabled = !isEditModeOn;
+            navigation_panel.Enabled = !isEditModeOn;
+            ok_button.Enabled = isEditModeOn;
+            ok_button.Visible = isEditModeOn;
+            cancel_button.Enabled = isEditModeOn;
+
+            foreach (Control control in textBox_panel.Controls)
             {
-                this.add_button.Enabled = false;
-                this.edit_button.Enabled = false;
-                this.delete_button.Enabled = false;
-                this.ok_button.Enabled = true;
-                this.ok_button.Visible = true;
-                this.cancel_button.Enabled = true;
-            }
-            else
-            {
-                this.add_button.Enabled = true;
-                this.edit_button.Enabled = true;
-                this.delete_button.Enabled = true;
-                this.ok_button.Enabled = false;
-                this.ok_button.Visible = false;
-                this.cancel_button.Enabled = false;
+                if (control is TextBox textBox)
+                    textBox.ReadOnly = !isEditModeOn;
+
+                if (control is DateTimePicker picker)
+                    picker.Visible = isEditModeOn;
+
+                if (control is MaskedTextBox maskedTextBox)
+                    maskedTextBox.ReadOnly = !isEditModeOn;
             }
 
         }
-        private void Notebook_HardSaving(object sender, FormClosingEventArgs e)
+        private void Notebook_Saving(object sender, FormClosingEventArgs e)
         {
-            using (FileStream temp = new FileStream("temp", FileMode.Create))
+            string tempPath = ".temp";
+            using (FileStream temp = new FileStream(tempPath, FileMode.Create))
             {
                 byte[] block = new byte[BlockSize];
                 fileStream.Position = 0;
@@ -313,18 +321,21 @@ namespace ContactBook
             }
             fileStream.Close();
             File.Delete(FilePath);
-            File.Move("temp", FilePath);
+            File.Move(tempPath, FilePath);
         }
     }
     public class Record
     {
-        public int size = 1 + 20 + 20 + 20 + 10 + 18;
+        public static int symbolSize = 2;
+        public static int BlockSize = 1 + (20 + 20 + 20) * symbolSize + 10 + 18; // NEED TO FIX THIS MESS
+
         public bool isDeleted = false;
-        public char[] firstName = new char[20];
-        public char[] lastName = new char[20];
-        public char[] middleName = new char[20];
-        public char[] birthDate = new char[10];
-        public char[] phoneNumber = new char[18];
+        public char[] firstName { get; } = new char[20];
+        public char[] lastName { get; } = new char[20];
+        public char[] middleName { get; } = new char[20];
+        public char[] birthDate { get; } = new char[10];
+        public char[] phoneNumber { get; } = new char[18];
+
         public Record(char[] firstName, char[] lastName, char[] middleName, char[] birthDate, char[] phoneNumber)
         {
             this.firstName = firstName;
@@ -335,7 +346,7 @@ namespace ContactBook
         }
         public Record(byte[] byteArray)
         {
-            char[] charArray = System.Text.Encoding.UTF8.GetChars(byteArray);
+            char[] charArray = Encoding.UTF8.GetChars(byteArray);
             isDeleted = charArray[0] == 0 ? true : false;
             Array.Copy(charArray, 1, firstName, 0, 20);
             Array.Copy(charArray, 21, lastName, 0, 20);
@@ -345,7 +356,7 @@ namespace ContactBook
         }
         public byte[] Serialize2Byte()
         {
-            char[] charArray = new char[size];
+            char[] charArray = new char[BlockSize];
             charArray[0] = (char)(isDeleted ? 1 : 0);
             firstName.CopyTo(charArray, 1);
             lastName.CopyTo(charArray, 21);

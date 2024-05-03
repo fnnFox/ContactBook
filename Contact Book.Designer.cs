@@ -31,10 +31,10 @@
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.textBox_panel = new System.Windows.Forms.Panel();
             this.firstName_box = new System.Windows.Forms.TextBox();
-            this.birthDate_box = new System.Windows.Forms.DateTimePicker();
-            this.phoneNumber_box = new System.Windows.Forms.MaskedTextBox();
             this.middleName_box = new System.Windows.Forms.TextBox();
             this.lastName_box = new System.Windows.Forms.TextBox();
+            this.birthDateMasked_box = new System.Windows.Forms.MaskedTextBox();
+            this.phoneNumber_box = new System.Windows.Forms.MaskedTextBox();
             this.cancel_button = new System.Windows.Forms.Button();
             this.search_button = new System.Windows.Forms.Button();
             this.navigation_panel = new System.Windows.Forms.Panel();
@@ -51,7 +51,8 @@
             this.lastName_label = new System.Windows.Forms.Label();
             this.ok_button = new System.Windows.Forms.Button();
             this.add_button = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
+            this.searchPlaceholder_label = new System.Windows.Forms.Label();
+            this.birthDatePicker_box = new System.Windows.Forms.DateTimePicker();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -59,8 +60,6 @@
             this.textBox_panel.SuspendLayout();
             this.navigation_panel.SuspendLayout();
             this.SuspendLayout();
-
-            this.FormClosing += this.Notebook_HardSaving;
             // 
             // splitContainer
             // 
@@ -89,7 +88,7 @@
             // 
             // splitContainer.Panel2
             // 
-            this.splitContainer.Panel2.Controls.Add(this.label1);
+            this.splitContainer.Panel2.Controls.Add(this.searchPlaceholder_label);
             this.splitContainer.Size = new System.Drawing.Size(349, 420);
             this.splitContainer.SplitterDistance = 192;
             this.splitContainer.TabIndex = 0;
@@ -97,10 +96,11 @@
             // textBox_panel
             // 
             this.textBox_panel.Controls.Add(this.firstName_box);
-            this.textBox_panel.Controls.Add(this.birthDate_box);
-            this.textBox_panel.Controls.Add(this.phoneNumber_box);
+            this.textBox_panel.Controls.Add(this.birthDatePicker_box);
             this.textBox_panel.Controls.Add(this.middleName_box);
             this.textBox_panel.Controls.Add(this.lastName_box);
+            this.textBox_panel.Controls.Add(this.birthDateMasked_box);
+            this.textBox_panel.Controls.Add(this.phoneNumber_box);
             this.textBox_panel.Location = new System.Drawing.Point(97, 10);
             this.textBox_panel.Name = "textBox_panel";
             this.textBox_panel.Size = new System.Drawing.Size(154, 141);
@@ -108,50 +108,48 @@
             // 
             // firstName_box
             // 
-            this.firstName_box.Enabled = false;
             this.firstName_box.Location = new System.Drawing.Point(8, 7);
             this.firstName_box.MaxLength = 20;
             this.firstName_box.Name = "firstName_box";
+            this.firstName_box.ReadOnly = true;
             this.firstName_box.Size = new System.Drawing.Size(136, 20);
             this.firstName_box.TabIndex = 0;
             // 
-            // birthDate_box
-            // 
-            this.birthDate_box.CustomFormat = "dd/MM/yyyy";
-            this.birthDate_box.Enabled = false;
-            this.birthDate_box.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.birthDate_box.Location = new System.Drawing.Point(8, 86);
-            this.birthDate_box.Name = "birthDate_box";
-            this.birthDate_box.Size = new System.Drawing.Size(100, 20);
-            this.birthDate_box.TabIndex = 3;
-            this.birthDate_box.Value = new System.DateTime(2024, 4, 20, 0, 0, 0, 0);
-            // 
-            // phoneNumber_box
-            // 
-            this.phoneNumber_box.Enabled = false;
-            this.phoneNumber_box.Location = new System.Drawing.Point(8, 112);
-            this.phoneNumber_box.Mask = "+7 (999) 000 00 00";
-            this.phoneNumber_box.Name = "phoneNumber_box";
-            this.phoneNumber_box.Size = new System.Drawing.Size(100, 20);
-            this.phoneNumber_box.TabIndex = 4;
-            // 
             // middleName_box
             // 
-            this.middleName_box.Enabled = false;
             this.middleName_box.Location = new System.Drawing.Point(8, 60);
             this.middleName_box.MaxLength = 20;
             this.middleName_box.Name = "middleName_box";
+            this.middleName_box.ReadOnly = true;
             this.middleName_box.Size = new System.Drawing.Size(136, 20);
             this.middleName_box.TabIndex = 2;
             // 
             // lastName_box
             // 
-            this.lastName_box.Enabled = false;
             this.lastName_box.Location = new System.Drawing.Point(8, 33);
             this.lastName_box.MaxLength = 20;
             this.lastName_box.Name = "lastName_box";
+            this.lastName_box.ReadOnly = true;
             this.lastName_box.Size = new System.Drawing.Size(136, 20);
             this.lastName_box.TabIndex = 1;
+            // 
+            // birthDateMasked_box
+            // 
+            this.birthDateMasked_box.Location = new System.Drawing.Point(8, 86);
+            this.birthDateMasked_box.Mask = "00\\/00\\/0000";
+            this.birthDateMasked_box.Name = "birthDateMasked_box";
+            this.birthDateMasked_box.ReadOnly = true;
+            this.birthDateMasked_box.Size = new System.Drawing.Size(100, 20);
+            this.birthDateMasked_box.TabIndex = 1;
+            // 
+            // phoneNumber_box
+            // 
+            this.phoneNumber_box.Location = new System.Drawing.Point(8, 112);
+            this.phoneNumber_box.Mask = "+7 (999) 000 00 00";
+            this.phoneNumber_box.Name = "phoneNumber_box";
+            this.phoneNumber_box.ReadOnly = true;
+            this.phoneNumber_box.Size = new System.Drawing.Size(100, 20);
+            this.phoneNumber_box.TabIndex = 4;
             // 
             // cancel_button
             // 
@@ -187,17 +185,6 @@
             this.navigation_panel.Size = new System.Drawing.Size(318, 27);
             this.navigation_panel.TabIndex = 33;
             // 
-            // firstPosition_button
-            // 
-            this.firstPosition_button.Location = new System.Drawing.Point(0, 0);
-            this.firstPosition_button.Name = "firstPosition_button";
-            this.firstPosition_button.Size = new System.Drawing.Size(75, 23);
-            this.firstPosition_button.TabIndex = 10;
-            this.firstPosition_button.TabStop = false;
-            this.firstPosition_button.Text = "В начало";
-            this.firstPosition_button.UseVisualStyleBackColor = true;
-            this.firstPosition_button.Click += new System.EventHandler(this.firstPosition_button_Click);
-            // 
             // lastPosition_button
             // 
             this.lastPosition_button.Location = new System.Drawing.Point(243, 0);
@@ -209,17 +196,6 @@
             this.lastPosition_button.UseVisualStyleBackColor = true;
             this.lastPosition_button.Click += new System.EventHandler(this.lastPosition_button_Click);
             // 
-            // nextPosition_button
-            // 
-            this.nextPosition_button.Location = new System.Drawing.Point(162, 0);
-            this.nextPosition_button.Name = "nextPosition_button";
-            this.nextPosition_button.Size = new System.Drawing.Size(75, 23);
-            this.nextPosition_button.TabIndex = 12;
-            this.nextPosition_button.TabStop = false;
-            this.nextPosition_button.Text = "Вперёд";
-            this.nextPosition_button.UseVisualStyleBackColor = true;
-            this.nextPosition_button.Click += new System.EventHandler(this.nextPosition_button_Click);
-            // 
             // previousPosition_button
             // 
             this.previousPosition_button.Location = new System.Drawing.Point(81, 0);
@@ -230,6 +206,28 @@
             this.previousPosition_button.Text = "Назад";
             this.previousPosition_button.UseVisualStyleBackColor = true;
             this.previousPosition_button.Click += new System.EventHandler(this.previousPosition_button_Click);
+            // 
+            // firstPosition_button
+            // 
+            this.firstPosition_button.Location = new System.Drawing.Point(0, 0);
+            this.firstPosition_button.Name = "firstPosition_button";
+            this.firstPosition_button.Size = new System.Drawing.Size(75, 23);
+            this.firstPosition_button.TabIndex = 10;
+            this.firstPosition_button.TabStop = false;
+            this.firstPosition_button.Text = "В начало";
+            this.firstPosition_button.UseVisualStyleBackColor = true;
+            this.firstPosition_button.Click += new System.EventHandler(this.firstPosition_button_Click);
+            // 
+            // nextPosition_button
+            // 
+            this.nextPosition_button.Location = new System.Drawing.Point(162, 0);
+            this.nextPosition_button.Name = "nextPosition_button";
+            this.nextPosition_button.Size = new System.Drawing.Size(75, 23);
+            this.nextPosition_button.TabIndex = 12;
+            this.nextPosition_button.TabStop = false;
+            this.nextPosition_button.Text = "Вперёд";
+            this.nextPosition_button.UseVisualStyleBackColor = true;
+            this.nextPosition_button.Click += new System.EventHandler(this.nextPosition_button_Click);
             // 
             // delete_button
             // 
@@ -327,16 +325,27 @@
             this.add_button.UseVisualStyleBackColor = true;
             this.add_button.Click += new System.EventHandler(this.add_button_Click);
             // 
-            // label1
+            // searchPlaceholder_label
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(15, 21);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(55, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "тут поиск";
+            this.searchPlaceholder_label.AutoSize = true;
+            this.searchPlaceholder_label.Location = new System.Drawing.Point(15, 21);
+            this.searchPlaceholder_label.Name = "searchPlaceholder_label";
+            this.searchPlaceholder_label.Size = new System.Drawing.Size(55, 13);
+            this.searchPlaceholder_label.TabIndex = 0;
+            this.searchPlaceholder_label.Text = "тут поиск";
             // 
-            // Notebook
+            // birthDatePicker_box
+            // 
+            this.birthDatePicker_box.CustomFormat = "dd/MM/yyyy";
+            this.birthDatePicker_box.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.birthDatePicker_box.Location = new System.Drawing.Point(8, 86);
+            this.birthDatePicker_box.Name = "birthDatePicker_box";
+            this.birthDatePicker_box.Size = new System.Drawing.Size(100, 20);
+            this.birthDatePicker_box.TabIndex = 3;
+            this.birthDatePicker_box.Value = new System.DateTime(2024, 4, 20, 0, 0, 0, 0);
+            this.birthDatePicker_box.Visible = false;
+            // 
+            // ContactBook
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -346,7 +355,7 @@
             this.Controls.Add(this.splitContainer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.Name = "Notebook";
+            this.Name = "ContactBook";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Записная книжка";
@@ -378,7 +387,7 @@
         private System.Windows.Forms.Label firstName_label;
         private System.Windows.Forms.Label phoneNumber_label;
         private System.Windows.Forms.Label birthDate_label;
-        private System.Windows.Forms.DateTimePicker birthDate_box;
+        private System.Windows.Forms.DateTimePicker birthDatePicker_box;
         private System.Windows.Forms.MaskedTextBox phoneNumber_box;
         private System.Windows.Forms.TextBox middleName_box;
         private System.Windows.Forms.TextBox lastName_box;
@@ -389,10 +398,11 @@
         private System.Windows.Forms.Panel navigation_panel;
         private System.Windows.Forms.Button lastPosition_button;
         private System.Windows.Forms.Button nextPosition_button;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label searchPlaceholder_label;
         private System.Windows.Forms.Button cancel_button;
         private System.Windows.Forms.Button ok_button;
         private System.Windows.Forms.Panel textBox_panel;
+        private System.Windows.Forms.MaskedTextBox birthDateMasked_box;
     }
 }
 
