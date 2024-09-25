@@ -29,8 +29,10 @@
         private void InitializeComponent()
         {
             this.splitContainer = new System.Windows.Forms.SplitContainer();
+            this.page_label = new System.Windows.Forms.Label();
             this.textBox_panel = new System.Windows.Forms.Panel();
             this.firstName_box = new System.Windows.Forms.TextBox();
+            this.birthDatePicker_box = new System.Windows.Forms.DateTimePicker();
             this.middleName_box = new System.Windows.Forms.TextBox();
             this.lastName_box = new System.Windows.Forms.TextBox();
             this.birthDateMasked_box = new System.Windows.Forms.MaskedTextBox();
@@ -51,14 +53,38 @@
             this.lastName_label = new System.Windows.Forms.Label();
             this.ok_button = new System.Windows.Forms.Button();
             this.add_button = new System.Windows.Forms.Button();
-            this.searchPlaceholder_label = new System.Windows.Forms.Label();
-            this.birthDatePicker_box = new System.Windows.Forms.DateTimePicker();
+            this.radioBox = new System.Windows.Forms.GroupBox();
+            this.or = new System.Windows.Forms.RadioButton();
+            this.and = new System.Windows.Forms.RadioButton();
+            this.goSearch_button = new System.Windows.Forms.Button();
+            this.anything_search = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.phoneNumber_check = new System.Windows.Forms.CheckBox();
+            this.birthDatePicker_check = new System.Windows.Forms.CheckBox();
+            this.middleName_check = new System.Windows.Forms.CheckBox();
+            this.lastName_check = new System.Windows.Forms.CheckBox();
+            this.firstName_check = new System.Windows.Forms.CheckBox();
+            this.firstName_search = new System.Windows.Forms.TextBox();
+            this.birthDatePicker_search = new System.Windows.Forms.DateTimePicker();
+            this.middleName_search = new System.Windows.Forms.TextBox();
+            this.lastName_search = new System.Windows.Forms.TextBox();
+            this.phoneNumber_search = new System.Windows.Forms.MaskedTextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.listBox = new System.Windows.Forms.ListBox();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
             this.splitContainer.SuspendLayout();
             this.textBox_panel.SuspendLayout();
             this.navigation_panel.SuspendLayout();
+            this.radioBox.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer
@@ -72,6 +98,7 @@
             // 
             // splitContainer.Panel1
             // 
+            this.splitContainer.Panel1.Controls.Add(this.page_label);
             this.splitContainer.Panel1.Controls.Add(this.textBox_panel);
             this.splitContainer.Panel1.Controls.Add(this.cancel_button);
             this.splitContainer.Panel1.Controls.Add(this.search_button);
@@ -88,10 +115,28 @@
             // 
             // splitContainer.Panel2
             // 
-            this.splitContainer.Panel2.Controls.Add(this.searchPlaceholder_label);
-            this.splitContainer.Size = new System.Drawing.Size(349, 420);
-            this.splitContainer.SplitterDistance = 192;
+            this.splitContainer.Panel2.Controls.Add(this.radioBox);
+            this.splitContainer.Panel2.Controls.Add(this.goSearch_button);
+            this.splitContainer.Panel2.Controls.Add(this.anything_search);
+            this.splitContainer.Panel2.Controls.Add(this.label1);
+            this.splitContainer.Panel2.Controls.Add(this.panel1);
+            this.splitContainer.Panel2.Controls.Add(this.label2);
+            this.splitContainer.Panel2.Controls.Add(this.label3);
+            this.splitContainer.Panel2.Controls.Add(this.label4);
+            this.splitContainer.Panel2.Controls.Add(this.label5);
+            this.splitContainer.Panel2.Controls.Add(this.label6);
+            this.splitContainer.Panel2.Controls.Add(this.listBox);
+            this.splitContainer.Size = new System.Drawing.Size(349, 530);
+            this.splitContainer.SplitterDistance = 217;
             this.splitContainer.TabIndex = 0;
+            // 
+            // page_label
+            // 
+            this.page_label.AutoSize = true;
+            this.page_label.Location = new System.Drawing.Point(29, 149);
+            this.page_label.Name = "page_label";
+            this.page_label.Size = new System.Drawing.Size(0, 13);
+            this.page_label.TabIndex = 37;
             // 
             // textBox_panel
             // 
@@ -114,6 +159,17 @@
             this.firstName_box.ReadOnly = true;
             this.firstName_box.Size = new System.Drawing.Size(136, 20);
             this.firstName_box.TabIndex = 0;
+            // 
+            // birthDatePicker_box
+            // 
+            this.birthDatePicker_box.CustomFormat = "dd/MM/yyyy";
+            this.birthDatePicker_box.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.birthDatePicker_box.Location = new System.Drawing.Point(8, 86);
+            this.birthDatePicker_box.Name = "birthDatePicker_box";
+            this.birthDatePicker_box.Size = new System.Drawing.Size(100, 20);
+            this.birthDatePicker_box.TabIndex = 3;
+            this.birthDatePicker_box.Value = new System.DateTime(2024, 4, 20, 0, 0, 0, 0);
+            this.birthDatePicker_box.Visible = false;
             // 
             // middleName_box
             // 
@@ -180,7 +236,7 @@
             this.navigation_panel.Controls.Add(this.previousPosition_button);
             this.navigation_panel.Controls.Add(this.firstPosition_button);
             this.navigation_panel.Controls.Add(this.nextPosition_button);
-            this.navigation_panel.Location = new System.Drawing.Point(15, 157);
+            this.navigation_panel.Location = new System.Drawing.Point(15, 176);
             this.navigation_panel.Name = "navigation_panel";
             this.navigation_panel.Size = new System.Drawing.Size(318, 27);
             this.navigation_panel.TabIndex = 33;
@@ -325,25 +381,227 @@
             this.add_button.UseVisualStyleBackColor = true;
             this.add_button.Click += new System.EventHandler(this.add_button_Click);
             // 
-            // searchPlaceholder_label
+            // radioBox
             // 
-            this.searchPlaceholder_label.AutoSize = true;
-            this.searchPlaceholder_label.Location = new System.Drawing.Point(15, 21);
-            this.searchPlaceholder_label.Name = "searchPlaceholder_label";
-            this.searchPlaceholder_label.Size = new System.Drawing.Size(55, 13);
-            this.searchPlaceholder_label.TabIndex = 0;
-            this.searchPlaceholder_label.Text = "тут поиск";
+            this.radioBox.Controls.Add(this.or);
+            this.radioBox.Controls.Add(this.and);
+            this.radioBox.Location = new System.Drawing.Point(277, 39);
+            this.radioBox.Name = "radioBox";
+            this.radioBox.Size = new System.Drawing.Size(57, 66);
+            this.radioBox.TabIndex = 47;
+            this.radioBox.TabStop = false;
             // 
-            // birthDatePicker_box
+            // or
             // 
-            this.birthDatePicker_box.CustomFormat = "dd/MM/yyyy";
-            this.birthDatePicker_box.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.birthDatePicker_box.Location = new System.Drawing.Point(8, 86);
-            this.birthDatePicker_box.Name = "birthDatePicker_box";
-            this.birthDatePicker_box.Size = new System.Drawing.Size(100, 20);
-            this.birthDatePicker_box.TabIndex = 3;
-            this.birthDatePicker_box.Value = new System.DateTime(2024, 4, 20, 0, 0, 0, 0);
-            this.birthDatePicker_box.Visible = false;
+            this.or.AutoSize = true;
+            this.or.Checked = true;
+            this.or.Location = new System.Drawing.Point(6, 42);
+            this.or.Name = "or";
+            this.or.Size = new System.Drawing.Size(41, 17);
+            this.or.TabIndex = 1;
+            this.or.TabStop = true;
+            this.or.Text = "OR";
+            this.or.UseVisualStyleBackColor = true;
+            // 
+            // and
+            // 
+            this.and.AutoSize = true;
+            this.and.Location = new System.Drawing.Point(6, 19);
+            this.and.Name = "and";
+            this.and.Size = new System.Drawing.Size(48, 17);
+            this.and.TabIndex = 0;
+            this.and.TabStop = true;
+            this.and.Text = "AND";
+            this.and.UseVisualStyleBackColor = true;
+            // 
+            // goSearch_button
+            // 
+            this.goSearch_button.Location = new System.Drawing.Point(259, 148);
+            this.goSearch_button.Name = "goSearch_button";
+            this.goSearch_button.Size = new System.Drawing.Size(75, 23);
+            this.goSearch_button.TabIndex = 46;
+            this.goSearch_button.TabStop = false;
+            this.goSearch_button.Text = "Искать";
+            this.goSearch_button.UseVisualStyleBackColor = true;
+            this.goSearch_button.Click += new System.EventHandler(this.goSearch_button_Click);
+            // 
+            // anything_search
+            // 
+            this.anything_search.Location = new System.Drawing.Point(15, 150);
+            this.anything_search.MaxLength = 20;
+            this.anything_search.Name = "anything_search";
+            this.anything_search.Size = new System.Drawing.Size(225, 20);
+            this.anything_search.TabIndex = 45;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(28, 142);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(0, 13);
+            this.label1.TabIndex = 44;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.phoneNumber_check);
+            this.panel1.Controls.Add(this.birthDatePicker_check);
+            this.panel1.Controls.Add(this.middleName_check);
+            this.panel1.Controls.Add(this.lastName_check);
+            this.panel1.Controls.Add(this.firstName_check);
+            this.panel1.Controls.Add(this.firstName_search);
+            this.panel1.Controls.Add(this.birthDatePicker_search);
+            this.panel1.Controls.Add(this.middleName_search);
+            this.panel1.Controls.Add(this.lastName_search);
+            this.panel1.Controls.Add(this.phoneNumber_search);
+            this.panel1.Location = new System.Drawing.Point(96, 3);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(175, 141);
+            this.panel1.TabIndex = 43;
+            // 
+            // phoneNumber_check
+            // 
+            this.phoneNumber_check.AutoSize = true;
+            this.phoneNumber_check.Location = new System.Drawing.Point(151, 114);
+            this.phoneNumber_check.Name = "phoneNumber_check";
+            this.phoneNumber_check.Size = new System.Drawing.Size(15, 14);
+            this.phoneNumber_check.TabIndex = 9;
+            this.phoneNumber_check.UseVisualStyleBackColor = true;
+            // 
+            // birthDatePicker_check
+            // 
+            this.birthDatePicker_check.AutoSize = true;
+            this.birthDatePicker_check.Location = new System.Drawing.Point(151, 88);
+            this.birthDatePicker_check.Name = "birthDatePicker_check";
+            this.birthDatePicker_check.Size = new System.Drawing.Size(15, 14);
+            this.birthDatePicker_check.TabIndex = 8;
+            this.birthDatePicker_check.UseVisualStyleBackColor = true;
+            // 
+            // middleName_check
+            // 
+            this.middleName_check.AutoSize = true;
+            this.middleName_check.Location = new System.Drawing.Point(151, 62);
+            this.middleName_check.Name = "middleName_check";
+            this.middleName_check.Size = new System.Drawing.Size(15, 14);
+            this.middleName_check.TabIndex = 7;
+            this.middleName_check.UseVisualStyleBackColor = true;
+            // 
+            // lastName_check
+            // 
+            this.lastName_check.AutoSize = true;
+            this.lastName_check.Location = new System.Drawing.Point(151, 35);
+            this.lastName_check.Name = "lastName_check";
+            this.lastName_check.Size = new System.Drawing.Size(15, 14);
+            this.lastName_check.TabIndex = 6;
+            this.lastName_check.UseVisualStyleBackColor = true;
+            // 
+            // firstName_check
+            // 
+            this.firstName_check.AutoSize = true;
+            this.firstName_check.Location = new System.Drawing.Point(151, 9);
+            this.firstName_check.Name = "firstName_check";
+            this.firstName_check.Size = new System.Drawing.Size(15, 14);
+            this.firstName_check.TabIndex = 5;
+            this.firstName_check.UseVisualStyleBackColor = true;
+            // 
+            // firstName_search
+            // 
+            this.firstName_search.Location = new System.Drawing.Point(8, 7);
+            this.firstName_search.MaxLength = 20;
+            this.firstName_search.Name = "firstName_search";
+            this.firstName_search.Size = new System.Drawing.Size(136, 20);
+            this.firstName_search.TabIndex = 0;
+            // 
+            // birthDatePicker_search
+            // 
+            this.birthDatePicker_search.CustomFormat = "dd/MM/yyyy";
+            this.birthDatePicker_search.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.birthDatePicker_search.Location = new System.Drawing.Point(8, 86);
+            this.birthDatePicker_search.Name = "birthDatePicker_search";
+            this.birthDatePicker_search.Size = new System.Drawing.Size(100, 20);
+            this.birthDatePicker_search.TabIndex = 3;
+            this.birthDatePicker_search.Value = new System.DateTime(2024, 4, 20, 0, 0, 0, 0);
+            // 
+            // middleName_search
+            // 
+            this.middleName_search.Location = new System.Drawing.Point(8, 60);
+            this.middleName_search.MaxLength = 20;
+            this.middleName_search.Name = "middleName_search";
+            this.middleName_search.Size = new System.Drawing.Size(136, 20);
+            this.middleName_search.TabIndex = 2;
+            // 
+            // lastName_search
+            // 
+            this.lastName_search.Location = new System.Drawing.Point(8, 33);
+            this.lastName_search.MaxLength = 20;
+            this.lastName_search.Name = "lastName_search";
+            this.lastName_search.Size = new System.Drawing.Size(136, 20);
+            this.lastName_search.TabIndex = 1;
+            // 
+            // phoneNumber_search
+            // 
+            this.phoneNumber_search.Location = new System.Drawing.Point(8, 112);
+            this.phoneNumber_search.Mask = "+7 (999) 000 00 00";
+            this.phoneNumber_search.Name = "phoneNumber_search";
+            this.phoneNumber_search.Size = new System.Drawing.Size(100, 20);
+            this.phoneNumber_search.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(11, 13);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(29, 13);
+            this.label2.TabIndex = 38;
+            this.label2.Text = "Имя";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(11, 118);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(52, 13);
+            this.label3.TabIndex = 42;
+            this.label3.Text = "Телефон";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(11, 93);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(86, 13);
+            this.label4.TabIndex = 41;
+            this.label4.Text = "Дата рождения";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(11, 66);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(54, 13);
+            this.label5.TabIndex = 40;
+            this.label5.Text = "Отчество";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(11, 39);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(56, 13);
+            this.label6.TabIndex = 39;
+            this.label6.Text = "Фамилия";
+            // 
+            // listBox
+            // 
+            this.listBox.FormattingEnabled = true;
+            this.listBox.Location = new System.Drawing.Point(11, 188);
+            this.listBox.Name = "listBox";
+            this.listBox.Size = new System.Drawing.Size(325, 108);
+            this.listBox.TabIndex = 1;
+            this.listBox.SelectedIndexChanged += new System.EventHandler(this.listBox_Select);
+            // 
+            // openFileDialog
+            // 
+            this.openFileDialog.FileName = "openFileDialog1";
             // 
             // ContactBook
             // 
@@ -351,7 +609,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
-            this.ClientSize = new System.Drawing.Size(349, 420);
+            this.ClientSize = new System.Drawing.Size(349, 530);
             this.Controls.Add(this.splitContainer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -368,14 +626,18 @@
             this.textBox_panel.ResumeLayout(false);
             this.textBox_panel.PerformLayout();
             this.navigation_panel.ResumeLayout(false);
+            this.radioBox.ResumeLayout(false);
+            this.radioBox.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
-        private void Notebook_HardSave(object sender, System.Windows.Forms.FormClosingEventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
+        //private void Notebook_HardSave(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
 
         #endregion
         private System.Windows.Forms.SplitContainer splitContainer;
@@ -398,11 +660,35 @@
         private System.Windows.Forms.Panel navigation_panel;
         private System.Windows.Forms.Button lastPosition_button;
         private System.Windows.Forms.Button nextPosition_button;
-        private System.Windows.Forms.Label searchPlaceholder_label;
         private System.Windows.Forms.Button cancel_button;
         private System.Windows.Forms.Button ok_button;
         private System.Windows.Forms.Panel textBox_panel;
         private System.Windows.Forms.MaskedTextBox birthDateMasked_box;
+        private System.Windows.Forms.Label page_label;
+        private System.Windows.Forms.ListBox listBox;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.TextBox firstName_search;
+        private System.Windows.Forms.DateTimePicker birthDatePicker_search;
+        private System.Windows.Forms.TextBox middleName_search;
+        private System.Windows.Forms.TextBox lastName_search;
+        private System.Windows.Forms.MaskedTextBox phoneNumber_search;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox anything_search;
+        private System.Windows.Forms.Button goSearch_button;
+        private System.Windows.Forms.CheckBox phoneNumber_check;
+        private System.Windows.Forms.CheckBox birthDatePicker_check;
+        private System.Windows.Forms.CheckBox middleName_check;
+        private System.Windows.Forms.CheckBox lastName_check;
+        private System.Windows.Forms.CheckBox firstName_check;
+        private System.Windows.Forms.GroupBox radioBox;
+        private System.Windows.Forms.RadioButton or;
+        private System.Windows.Forms.RadioButton and;
     }
 }
 
