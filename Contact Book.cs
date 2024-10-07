@@ -188,22 +188,36 @@ namespace ContactBook
 				comment_box.Text
 			);
 
-			if (!Mode)
+			if (!checkIsEmpty(CurrentRecord))
 			{
-				CurrentBlock = TotalBlocks;
-				fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
-				TotalBlocks++;
+				if (!checkForDubs(CurrentRecord))
+				{
+					if (!Mode)
+					{
+						CurrentBlock = TotalBlocks;
+						fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
+						TotalBlocks++;
+					}
+
+					fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
+					byte[] bytes = CurrentRecord.Serialize2Byte();
+					fileStream.Write(bytes, 0, BlockSize);
+					fileStream.Flush();
+
+					editMode(false);
+
+					readBlock();
+					updateBoxes();
+				}
+				else
+				{
+					MessageBox.Show("Такая запись уже существует", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 			}
-
-			fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
-			byte[] bytes = CurrentRecord.Serialize2Byte();
-			fileStream.Write(bytes, 0, BlockSize);
-			fileStream.Flush();
-
-			editMode(false);
-
-			readBlock();
-			updateBoxes();
+			else
+			{
+				MessageBox.Show("Запись пуста", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
 		private void cancel_button_Click(object sender, EventArgs e)
 		{
@@ -235,11 +249,12 @@ namespace ContactBook
 				listBox.Items.Add((i.index + 1) + ".  " + i.record.ToString());
 			}
 		}
-		private void listBox_Select(object sender, EventArgs e)
+		private void restore_button_Click(object sender, EventArgs e)
 		{
-			CurrentRecord = SearchResult[listBox.SelectedIndex].record;
-			CurrentBlock = SearchResult[listBox.SelectedIndex].index;
-			updateBoxes();
+			CurrentRecord.isDeleted = false;
+			fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
+			fileStream.Write(CurrentRecord.Serialize2Byte(), 0, BlockSize);
+			restore_button.Enabled = false;
 		}
 		
 		#endregion
@@ -251,7 +266,7 @@ namespace ContactBook
 			while (tempPos < TotalBlocks - 1)
 			{
 				fileStream.Seek(tempPos * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-				if (fileStream.ReadByte() == 0)
+				if (fileStream.ReadByte() == 0 || includeDeleted_check.Checked)
 				{
 					CurrentBlock = tempPos;
 					break;
@@ -268,7 +283,7 @@ namespace ContactBook
 			while (tempPos > 0)
 			{
 				fileStream.Seek(tempPos * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-				if (fileStream.ReadByte() == 0)
+				if (fileStream.ReadByte() == 0 || includeDeleted_check.Checked)
 				{
 					CurrentBlock = tempPos;
 					break;
@@ -287,7 +302,7 @@ namespace ContactBook
 				while (tempPos < TotalBlocks - 1)
 				{
 					fileStream.Seek(tempPos * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-					if (fileStream.ReadByte() == 0)
+					if (fileStream.ReadByte() == 0 || includeDeleted_check.Checked)
 					{
 						CurrentBlock = tempPos;
 						break;
@@ -307,7 +322,7 @@ namespace ContactBook
 				while (tempPos > 0)
 				{
 					fileStream.Seek(tempPos * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-					if (fileStream.ReadByte() == 0)
+					if (fileStream.ReadByte() == 0 || includeDeleted_check.Checked)
 					{
 						CurrentBlock = tempPos;
 						break;
@@ -343,6 +358,8 @@ namespace ContactBook
 			comment_box.Text = CurrentRecord.comment;
 
 			page_label.Text = $"{CurrentBlock+1}/{TotalBlocks}";
+
+			restore_button.Enabled = CurrentRecord.isDeleted;
 		}
 
 		// OLD
@@ -410,38 +427,44 @@ namespace ContactBook
 				if (control is MaskedTextBox maskedTextBox)
 					maskedTextBox.ReadOnly = !isEditModeOn;
 			}
-
 		}
-		#endregion
-
 		private void Notebook_Saving(object sender, FormClosingEventArgs e)
 		{
 			byte[] lastBlockOpened = BitConverter.GetBytes(CurrentBlock);
 
 			if (IsAnyDeleted)
 			{
-				string tempPath = ".temp";
-				using (FileStream tempStream = new FileStream(tempPath, FileMode.Create))
+				DialogResult dialogResult = MessageBox.Show("После закрытия программы будет невозможно восстановить удалённые записи. Закрыть?", "Внимание", MessageBoxButtons.YesNo);
+				if (dialogResult == DialogResult.Yes)
 				{
-					fileStream.Seek(0, SeekOrigin.Begin);
-					tempStream.Seek(0, SeekOrigin.Begin);
-					tempStream.Write(lastBlockOpened, 0, SymbolSize);
-
-					byte[] block = new byte[BlockSize];
-
-					fileStream.Seek(DataBegin, SeekOrigin.Begin);
-					tempStream.Seek(DataBegin, SeekOrigin.Begin);
-					while (fileStream.Read(block, 0, BlockSize) >= BlockSize)
+					string tempPath = ".temp";
+					using (FileStream tempStream = new FileStream(tempPath, FileMode.Create))
 					{
-						if (block[1] == 0)
+						fileStream.Seek(0, SeekOrigin.Begin);
+						tempStream.Seek(0, SeekOrigin.Begin);
+						tempStream.Write(lastBlockOpened, 0, SymbolSize);
+
+						byte[] block = new byte[BlockSize];
+
+						fileStream.Seek(DataBegin, SeekOrigin.Begin);
+						tempStream.Seek(DataBegin, SeekOrigin.Begin);
+						while (fileStream.Read(block, 0, BlockSize) >= BlockSize)
 						{
-							tempStream.Write(block, 0, BlockSize);
+							if (block[1] == 0)
+							{
+								tempStream.Write(block, 0, BlockSize);
+							}
 						}
 					}
+					fileStream.Close();
+					File.Delete(FilePath);
+					File.Move(tempPath, FilePath);
 				}
-				fileStream.Close();
-				File.Delete(FilePath);
-				File.Move(tempPath, FilePath);
+				else if (dialogResult == DialogResult.No)
+				{
+					e.Cancel = true;
+					return;
+				}
 			}
 			else
 			{
@@ -450,8 +473,13 @@ namespace ContactBook
 				fileStream.Close();
 			}
 		}
-
-		private List<(Record,int)> makeList()
+		private void listBox_Select(object sender, EventArgs e)
+		{
+			CurrentRecord = SearchResult[listBox.SelectedIndex].record;
+			CurrentBlock = SearchResult[listBox.SelectedIndex].index;
+			updateBoxes();
+		}
+		private List<(Record, int)> makeList()
 		{
 			List<(Record, int)> list = new List<(Record, int)>();
 
@@ -464,7 +492,7 @@ namespace ContactBook
 								country_search.Text,
 								city_search.Text
 			);
-			
+
 
 			byte[] block = new byte[BlockSize];
 			fileStream.Seek(DataBegin, SeekOrigin.Begin);
@@ -472,7 +500,7 @@ namespace ContactBook
 			while (fileStream.Read(block, 0, BlockSize) >= BlockSize)
 			{
 				Record rec = new Record(block);
-				if (rec.isDeleted) continue;
+				if (rec.isDeleted && !includeDeleted_check.Checked) continue;
 				bool check;
 
 				if (!anything_check.Checked)
@@ -541,6 +569,42 @@ namespace ContactBook
 			}
 			return list;
 		}
+		private bool checkForDubs(Record filter)
+		{
+			byte[] block = new byte[BlockSize];
+			fileStream.Seek(DataBegin, SeekOrigin.Begin);
+			while (fileStream.Read(block, 0, BlockSize) >= BlockSize)
+			{
+				Record rec = new Record(block);
+				if (rec.isDeleted) continue;
+
+				if (rec.firstName.ToLower().Equals(filter.firstName.ToLower()) &&
+					rec.lastName.ToLower().Equals(filter.lastName.ToLower()) &&
+					rec.middleName.ToLower().Equals(filter.middleName.ToLower()) &&
+					rec.birthDate.ToLower().Equals(filter.birthDate.ToLower()) &&
+					rec.phoneNumber.ToLower().Equals(filter.phoneNumber.ToLower()) &&
+					rec.country.ToLower().Equals(filter.country.ToLower()) &&
+					rec.city.ToLower().Equals(filter.city.ToLower()))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		private bool checkIsEmpty(Record record)
+		{
+			if (record.firstName.Length == 0 &&
+				record.lastName.Length == 0 &&
+				record.middleName.Length == 0 &&
+				record.birthDate.Length == 0 &&
+				record.phoneNumber.Length == 0)
+				return true;
+			return false;
+		}
+
+		#endregion
+
+
 	}
 	public class Record
 	{

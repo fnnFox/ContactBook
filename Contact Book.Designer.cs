@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
 			this.splitContainer = new System.Windows.Forms.SplitContainer();
+			this.restore_button = new System.Windows.Forms.Button();
+			this.includeDeleted_check = new System.Windows.Forms.CheckBox();
 			this.page_label = new System.Windows.Forms.Label();
 			this.main_table = new System.Windows.Forms.TableLayoutPanel();
 			this.firstName_box = new System.Windows.Forms.TextBox();
@@ -114,6 +116,8 @@
 			// 
 			// splitContainer.Panel1
 			// 
+			this.splitContainer.Panel1.Controls.Add(this.restore_button);
+			this.splitContainer.Panel1.Controls.Add(this.includeDeleted_check);
 			this.splitContainer.Panel1.Controls.Add(this.page_label);
 			this.splitContainer.Panel1.Controls.Add(this.main_table);
 			this.splitContainer.Panel1.Controls.Add(this.cancel_button);
@@ -137,10 +141,33 @@
 			this.splitContainer.TabIndex = 0;
 			this.splitContainer.TabStop = false;
 			// 
+			// restore_button
+			// 
+			this.restore_button.Enabled = false;
+			this.restore_button.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.restore_button.Location = new System.Drawing.Point(259, 190);
+			this.restore_button.Name = "restore_button";
+			this.restore_button.Size = new System.Drawing.Size(75, 23);
+			this.restore_button.TabIndex = 52;
+			this.restore_button.Text = "Восстановить";
+			this.restore_button.UseVisualStyleBackColor = true;
+			this.restore_button.Click += new System.EventHandler(this.restore_button_Click);
+			// 
+			// includeDeleted_check
+			// 
+			this.includeDeleted_check.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.includeDeleted_check.Location = new System.Drawing.Point(259, 157);
+			this.includeDeleted_check.Name = "includeDeleted_check";
+			this.includeDeleted_check.Size = new System.Drawing.Size(78, 32);
+			this.includeDeleted_check.TabIndex = 51;
+			this.includeDeleted_check.TabStop = false;
+			this.includeDeleted_check.Text = "Включая удалённые";
+			this.includeDeleted_check.UseVisualStyleBackColor = true;
+			// 
 			// page_label
 			// 
 			this.page_label.AutoSize = true;
-			this.page_label.Location = new System.Drawing.Point(279, 189);
+			this.page_label.Location = new System.Drawing.Point(279, 226);
 			this.page_label.Name = "page_label";
 			this.page_label.Size = new System.Drawing.Size(31, 13);
 			this.page_label.TabIndex = 37;
@@ -272,6 +299,7 @@
 			this.birthDate_box.Size = new System.Drawing.Size(103, 20);
 			this.birthDate_box.TabIndex = 3;
 			this.birthDate_box.TextMaskFormat = System.Windows.Forms.MaskFormat.ExcludePromptAndLiterals;
+			this.birthDate_box.ValidatingType = typeof(System.DateTime);
 			// 
 			// phoneNumber_label
 			// 
@@ -968,6 +996,8 @@
 		private System.Windows.Forms.TextBox email_box;
 		private System.Windows.Forms.TextBox website_box;
 		private System.Windows.Forms.TextBox comment_box;
+		private System.Windows.Forms.Button restore_button;
+		private System.Windows.Forms.CheckBox includeDeleted_check;
 	}
 }
 
