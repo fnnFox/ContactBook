@@ -29,8 +29,7 @@
         private void InitializeComponent()
         {
 			this.splitContainer = new System.Windows.Forms.SplitContainer();
-			this.restore_button = new System.Windows.Forms.Button();
-			this.includeDeleted_check = new System.Windows.Forms.CheckBox();
+			this.dataTable = new System.Windows.Forms.DataGridView();
 			this.page_label = new System.Windows.Forms.Label();
 			this.main_table = new System.Windows.Forms.TableLayoutPanel();
 			this.firstName_box = new System.Windows.Forms.TextBox();
@@ -55,11 +54,6 @@
 			this.comment_box = new System.Windows.Forms.TextBox();
 			this.cancel_button = new System.Windows.Forms.Button();
 			this.search_button = new System.Windows.Forms.Button();
-			this.navigation_panel = new System.Windows.Forms.Panel();
-			this.lastPosition_button = new System.Windows.Forms.Button();
-			this.previousPosition_button = new System.Windows.Forms.Button();
-			this.firstPosition_button = new System.Windows.Forms.Button();
-			this.nextPosition_button = new System.Windows.Forms.Button();
 			this.delete_button = new System.Windows.Forms.Button();
 			this.edit_button = new System.Windows.Forms.Button();
 			this.ok_button = new System.Windows.Forms.Button();
@@ -92,14 +86,13 @@
 			this.anything_check = new System.Windows.Forms.CheckBox();
 			this.goSearch_button = new System.Windows.Forms.Button();
 			this.anything_search = new System.Windows.Forms.TextBox();
-			this.listBox = new System.Windows.Forms.ListBox();
 			this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
 			this.splitContainer.Panel1.SuspendLayout();
 			this.splitContainer.Panel2.SuspendLayout();
 			this.splitContainer.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataTable)).BeginInit();
 			this.main_table.SuspendLayout();
-			this.navigation_panel.SuspendLayout();
 			this.andor_table.SuspendLayout();
 			this.search_table.SuspendLayout();
 			this.SuspendLayout();
@@ -116,13 +109,11 @@
 			// 
 			// splitContainer.Panel1
 			// 
-			this.splitContainer.Panel1.Controls.Add(this.restore_button);
-			this.splitContainer.Panel1.Controls.Add(this.includeDeleted_check);
+			this.splitContainer.Panel1.Controls.Add(this.dataTable);
 			this.splitContainer.Panel1.Controls.Add(this.page_label);
 			this.splitContainer.Panel1.Controls.Add(this.main_table);
 			this.splitContainer.Panel1.Controls.Add(this.cancel_button);
 			this.splitContainer.Panel1.Controls.Add(this.search_button);
-			this.splitContainer.Panel1.Controls.Add(this.navigation_panel);
 			this.splitContainer.Panel1.Controls.Add(this.delete_button);
 			this.splitContainer.Panel1.Controls.Add(this.edit_button);
 			this.splitContainer.Panel1.Controls.Add(this.ok_button);
@@ -135,39 +126,27 @@
 			this.splitContainer.Panel2.Controls.Add(this.anything_check);
 			this.splitContainer.Panel2.Controls.Add(this.goSearch_button);
 			this.splitContainer.Panel2.Controls.Add(this.anything_search);
-			this.splitContainer.Panel2.Controls.Add(this.listBox);
-			this.splitContainer.Size = new System.Drawing.Size(349, 602);
-			this.splitContainer.SplitterDistance = 290;
+			this.splitContainer.Size = new System.Drawing.Size(393, 610);
+			this.splitContainer.SplitterDistance = 384;
 			this.splitContainer.TabIndex = 0;
 			this.splitContainer.TabStop = false;
 			// 
-			// restore_button
+			// dataTable
 			// 
-			this.restore_button.Enabled = false;
-			this.restore_button.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.restore_button.Location = new System.Drawing.Point(259, 190);
-			this.restore_button.Name = "restore_button";
-			this.restore_button.Size = new System.Drawing.Size(75, 23);
-			this.restore_button.TabIndex = 52;
-			this.restore_button.Text = "Восстановить";
-			this.restore_button.UseVisualStyleBackColor = true;
-			this.restore_button.Click += new System.EventHandler(this.restore_button_Click);
-			// 
-			// includeDeleted_check
-			// 
-			this.includeDeleted_check.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.includeDeleted_check.Location = new System.Drawing.Point(259, 157);
-			this.includeDeleted_check.Name = "includeDeleted_check";
-			this.includeDeleted_check.Size = new System.Drawing.Size(78, 32);
-			this.includeDeleted_check.TabIndex = 51;
-			this.includeDeleted_check.TabStop = false;
-			this.includeDeleted_check.Text = "Включая удалённые";
-			this.includeDeleted_check.UseVisualStyleBackColor = true;
+			this.dataTable.AllowUserToAddRows = false;
+			this.dataTable.AllowUserToDeleteRows = false;
+			this.dataTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataTable.Location = new System.Drawing.Point(12, 256);
+			this.dataTable.Name = "dataTable";
+			this.dataTable.ReadOnly = true;
+			this.dataTable.Size = new System.Drawing.Size(368, 114);
+			this.dataTable.TabIndex = 51;
+			this.dataTable.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.listBox_Select);
 			// 
 			// page_label
 			// 
 			this.page_label.AutoSize = true;
-			this.page_label.Location = new System.Drawing.Point(279, 226);
+			this.page_label.Location = new System.Drawing.Point(324, 229);
 			this.page_label.Name = "page_label";
 			this.page_label.Size = new System.Drawing.Size(31, 13);
 			this.page_label.TabIndex = 37;
@@ -179,7 +158,7 @@
 			this.main_table.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			this.main_table.ColumnCount = 2;
 			this.main_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 93F));
-			this.main_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 149F));
+			this.main_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 192F));
 			this.main_table.Controls.Add(this.firstName_box, 1, 0);
 			this.main_table.Controls.Add(this.phoneNumber_box, 1, 4);
 			this.main_table.Controls.Add(this.middleName_box, 1, 2);
@@ -213,7 +192,7 @@
 			this.main_table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
 			this.main_table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
 			this.main_table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-			this.main_table.Size = new System.Drawing.Size(242, 240);
+			this.main_table.Size = new System.Drawing.Size(285, 240);
 			this.main_table.TabIndex = 50;
 			// 
 			// firstName_box
@@ -223,7 +202,7 @@
 			this.firstName_box.MaxLength = 20;
 			this.firstName_box.Name = "firstName_box";
 			this.firstName_box.ReadOnly = true;
-			this.firstName_box.Size = new System.Drawing.Size(139, 20);
+			this.firstName_box.Size = new System.Drawing.Size(186, 20);
 			this.firstName_box.TabIndex = 0;
 			// 
 			// phoneNumber_box
@@ -244,7 +223,7 @@
 			this.middleName_box.MaxLength = 20;
 			this.middleName_box.Name = "middleName_box";
 			this.middleName_box.ReadOnly = true;
-			this.middleName_box.Size = new System.Drawing.Size(139, 20);
+			this.middleName_box.Size = new System.Drawing.Size(186, 20);
 			this.middleName_box.TabIndex = 2;
 			// 
 			// firstName_label
@@ -265,7 +244,7 @@
 			this.lastName_box.MaxLength = 20;
 			this.lastName_box.Name = "lastName_box";
 			this.lastName_box.ReadOnly = true;
-			this.lastName_box.Size = new System.Drawing.Size(139, 20);
+			this.lastName_box.Size = new System.Drawing.Size(186, 20);
 			this.lastName_box.TabIndex = 1;
 			// 
 			// lastName_label
@@ -385,7 +364,7 @@
 			this.country_box.MaxLength = 20;
 			this.country_box.Name = "country_box";
 			this.country_box.ReadOnly = true;
-			this.country_box.Size = new System.Drawing.Size(139, 20);
+			this.country_box.Size = new System.Drawing.Size(186, 20);
 			this.country_box.TabIndex = 5;
 			// 
 			// city_box
@@ -395,7 +374,7 @@
 			this.city_box.MaxLength = 20;
 			this.city_box.Name = "city_box";
 			this.city_box.ReadOnly = true;
-			this.city_box.Size = new System.Drawing.Size(139, 20);
+			this.city_box.Size = new System.Drawing.Size(186, 20);
 			this.city_box.TabIndex = 6;
 			// 
 			// email_box
@@ -405,7 +384,7 @@
 			this.email_box.MaxLength = 20;
 			this.email_box.Name = "email_box";
 			this.email_box.ReadOnly = true;
-			this.email_box.Size = new System.Drawing.Size(139, 20);
+			this.email_box.Size = new System.Drawing.Size(186, 20);
 			this.email_box.TabIndex = 7;
 			// 
 			// website_box
@@ -415,7 +394,7 @@
 			this.website_box.MaxLength = 20;
 			this.website_box.Name = "website_box";
 			this.website_box.ReadOnly = true;
-			this.website_box.Size = new System.Drawing.Size(139, 20);
+			this.website_box.Size = new System.Drawing.Size(186, 20);
 			this.website_box.TabIndex = 8;
 			// 
 			// comment_box
@@ -425,13 +404,13 @@
 			this.comment_box.MaxLength = 20;
 			this.comment_box.Name = "comment_box";
 			this.comment_box.ReadOnly = true;
-			this.comment_box.Size = new System.Drawing.Size(139, 20);
+			this.comment_box.Size = new System.Drawing.Size(186, 20);
 			this.comment_box.TabIndex = 9;
 			// 
 			// cancel_button
 			// 
 			this.cancel_button.Enabled = false;
-			this.cancel_button.Location = new System.Drawing.Point(259, 95);
+			this.cancel_button.Location = new System.Drawing.Point(305, 93);
 			this.cancel_button.Name = "cancel_button";
 			this.cancel_button.Size = new System.Drawing.Size(75, 23);
 			this.cancel_button.TabIndex = 8;
@@ -442,7 +421,7 @@
 			// 
 			// search_button
 			// 
-			this.search_button.Location = new System.Drawing.Point(259, 124);
+			this.search_button.Location = new System.Drawing.Point(305, 122);
 			this.search_button.Name = "search_button";
 			this.search_button.Size = new System.Drawing.Size(75, 23);
 			this.search_button.TabIndex = 9;
@@ -451,64 +430,9 @@
 			this.search_button.UseVisualStyleBackColor = true;
 			this.search_button.Click += new System.EventHandler(this.search_button_Click);
 			// 
-			// navigation_panel
-			// 
-			this.navigation_panel.Controls.Add(this.lastPosition_button);
-			this.navigation_panel.Controls.Add(this.previousPosition_button);
-			this.navigation_panel.Controls.Add(this.firstPosition_button);
-			this.navigation_panel.Controls.Add(this.nextPosition_button);
-			this.navigation_panel.Location = new System.Drawing.Point(12, 256);
-			this.navigation_panel.Name = "navigation_panel";
-			this.navigation_panel.Size = new System.Drawing.Size(322, 27);
-			this.navigation_panel.TabIndex = 33;
-			// 
-			// lastPosition_button
-			// 
-			this.lastPosition_button.Location = new System.Drawing.Point(243, 0);
-			this.lastPosition_button.Name = "lastPosition_button";
-			this.lastPosition_button.Size = new System.Drawing.Size(75, 23);
-			this.lastPosition_button.TabIndex = 13;
-			this.lastPosition_button.TabStop = false;
-			this.lastPosition_button.Text = "В конец";
-			this.lastPosition_button.UseVisualStyleBackColor = true;
-			this.lastPosition_button.Click += new System.EventHandler(this.lastPosition_button_Click);
-			// 
-			// previousPosition_button
-			// 
-			this.previousPosition_button.Location = new System.Drawing.Point(81, 0);
-			this.previousPosition_button.Name = "previousPosition_button";
-			this.previousPosition_button.Size = new System.Drawing.Size(75, 23);
-			this.previousPosition_button.TabIndex = 11;
-			this.previousPosition_button.TabStop = false;
-			this.previousPosition_button.Text = "Назад";
-			this.previousPosition_button.UseVisualStyleBackColor = true;
-			this.previousPosition_button.Click += new System.EventHandler(this.previousPosition_button_Click);
-			// 
-			// firstPosition_button
-			// 
-			this.firstPosition_button.Location = new System.Drawing.Point(0, 0);
-			this.firstPosition_button.Name = "firstPosition_button";
-			this.firstPosition_button.Size = new System.Drawing.Size(75, 23);
-			this.firstPosition_button.TabIndex = 10;
-			this.firstPosition_button.TabStop = false;
-			this.firstPosition_button.Text = "В начало";
-			this.firstPosition_button.UseVisualStyleBackColor = true;
-			this.firstPosition_button.Click += new System.EventHandler(this.firstPosition_button_Click);
-			// 
-			// nextPosition_button
-			// 
-			this.nextPosition_button.Location = new System.Drawing.Point(162, 0);
-			this.nextPosition_button.Name = "nextPosition_button";
-			this.nextPosition_button.Size = new System.Drawing.Size(75, 23);
-			this.nextPosition_button.TabIndex = 12;
-			this.nextPosition_button.TabStop = false;
-			this.nextPosition_button.Text = "Вперёд";
-			this.nextPosition_button.UseVisualStyleBackColor = true;
-			this.nextPosition_button.Click += new System.EventHandler(this.nextPosition_button_Click);
-			// 
 			// delete_button
 			// 
-			this.delete_button.Location = new System.Drawing.Point(259, 68);
+			this.delete_button.Location = new System.Drawing.Point(305, 66);
 			this.delete_button.Name = "delete_button";
 			this.delete_button.Size = new System.Drawing.Size(75, 23);
 			this.delete_button.TabIndex = 7;
@@ -519,7 +443,7 @@
 			// 
 			// edit_button
 			// 
-			this.edit_button.Location = new System.Drawing.Point(259, 41);
+			this.edit_button.Location = new System.Drawing.Point(305, 39);
 			this.edit_button.Name = "edit_button";
 			this.edit_button.Size = new System.Drawing.Size(75, 23);
 			this.edit_button.TabIndex = 6;
@@ -531,7 +455,7 @@
 			// ok_button
 			// 
 			this.ok_button.Enabled = false;
-			this.ok_button.Location = new System.Drawing.Point(259, 15);
+			this.ok_button.Location = new System.Drawing.Point(305, 13);
 			this.ok_button.Name = "ok_button";
 			this.ok_button.Size = new System.Drawing.Size(75, 23);
 			this.ok_button.TabIndex = 5;
@@ -543,7 +467,7 @@
 			// 
 			// add_button
 			// 
-			this.add_button.Location = new System.Drawing.Point(259, 15);
+			this.add_button.Location = new System.Drawing.Point(305, 13);
 			this.add_button.Name = "add_button";
 			this.add_button.Size = new System.Drawing.Size(75, 23);
 			this.add_button.TabIndex = 27;
@@ -559,7 +483,7 @@
 			this.andor_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.andor_table.Controls.Add(this.or, 0, 1);
 			this.andor_table.Controls.Add(this.and, 0, 0);
-			this.andor_table.Location = new System.Drawing.Point(278, 48);
+			this.andor_table.Location = new System.Drawing.Point(324, 51);
 			this.andor_table.Name = "andor_table";
 			this.andor_table.RowCount = 2;
 			this.andor_table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -597,8 +521,8 @@
 			this.search_table.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			this.search_table.ColumnCount = 3;
 			this.search_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 96F));
-			this.search_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 86.82635F));
-			this.search_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 13.17365F));
+			this.search_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 186F));
+			this.search_table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
 			this.search_table.Controls.Add(this.phoneNumber_check, 2, 4);
 			this.search_table.Controls.Add(this.firstName_search, 1, 0);
 			this.search_table.Controls.Add(this.phoneNumber_search, 1, 4);
@@ -630,16 +554,16 @@
 			this.search_table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
 			this.search_table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
 			this.search_table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-			this.search_table.Size = new System.Drawing.Size(260, 168);
+			this.search_table.Size = new System.Drawing.Size(303, 168);
 			this.search_table.TabIndex = 49;
 			// 
 			// phoneNumber_check
 			// 
 			this.phoneNumber_check.AutoSize = true;
 			this.phoneNumber_check.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.phoneNumber_check.Location = new System.Drawing.Point(241, 99);
+			this.phoneNumber_check.Location = new System.Drawing.Point(285, 99);
 			this.phoneNumber_check.Name = "phoneNumber_check";
-			this.phoneNumber_check.Size = new System.Drawing.Size(16, 18);
+			this.phoneNumber_check.Size = new System.Drawing.Size(15, 18);
 			this.phoneNumber_check.TabIndex = 9;
 			this.phoneNumber_check.TabStop = false;
 			this.phoneNumber_check.UseVisualStyleBackColor = true;
@@ -650,7 +574,7 @@
 			this.firstName_search.Location = new System.Drawing.Point(99, 3);
 			this.firstName_search.MaxLength = 20;
 			this.firstName_search.Name = "firstName_search";
-			this.firstName_search.Size = new System.Drawing.Size(136, 20);
+			this.firstName_search.Size = new System.Drawing.Size(180, 20);
 			this.firstName_search.TabIndex = 0;
 			// 
 			// phoneNumber_search
@@ -667,9 +591,9 @@
 			// 
 			this.birthDate_check.AutoSize = true;
 			this.birthDate_check.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.birthDate_check.Location = new System.Drawing.Point(241, 75);
+			this.birthDate_check.Location = new System.Drawing.Point(285, 75);
 			this.birthDate_check.Name = "birthDate_check";
-			this.birthDate_check.Size = new System.Drawing.Size(16, 18);
+			this.birthDate_check.Size = new System.Drawing.Size(15, 18);
 			this.birthDate_check.TabIndex = 8;
 			this.birthDate_check.TabStop = false;
 			this.birthDate_check.UseVisualStyleBackColor = true;
@@ -678,9 +602,9 @@
 			// 
 			this.firstName_check.AutoSize = true;
 			this.firstName_check.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.firstName_check.Location = new System.Drawing.Point(241, 3);
+			this.firstName_check.Location = new System.Drawing.Point(285, 3);
 			this.firstName_check.Name = "firstName_check";
-			this.firstName_check.Size = new System.Drawing.Size(16, 18);
+			this.firstName_check.Size = new System.Drawing.Size(15, 18);
 			this.firstName_check.TabIndex = 5;
 			this.firstName_check.TabStop = false;
 			this.firstName_check.UseVisualStyleBackColor = true;
@@ -689,9 +613,9 @@
 			// 
 			this.middleName_check.AutoSize = true;
 			this.middleName_check.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.middleName_check.Location = new System.Drawing.Point(241, 51);
+			this.middleName_check.Location = new System.Drawing.Point(285, 51);
 			this.middleName_check.Name = "middleName_check";
-			this.middleName_check.Size = new System.Drawing.Size(16, 18);
+			this.middleName_check.Size = new System.Drawing.Size(15, 18);
 			this.middleName_check.TabIndex = 7;
 			this.middleName_check.TabStop = false;
 			this.middleName_check.UseVisualStyleBackColor = true;
@@ -746,7 +670,7 @@
 			this.lastName_search.Location = new System.Drawing.Point(99, 27);
 			this.lastName_search.MaxLength = 20;
 			this.lastName_search.Name = "lastName_search";
-			this.lastName_search.Size = new System.Drawing.Size(136, 20);
+			this.lastName_search.Size = new System.Drawing.Size(180, 20);
 			this.lastName_search.TabIndex = 1;
 			// 
 			// birthDate_search_label
@@ -764,9 +688,9 @@
 			// 
 			this.lastName_check.AutoSize = true;
 			this.lastName_check.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lastName_check.Location = new System.Drawing.Point(241, 27);
+			this.lastName_check.Location = new System.Drawing.Point(285, 27);
 			this.lastName_check.Name = "lastName_check";
-			this.lastName_check.Size = new System.Drawing.Size(16, 18);
+			this.lastName_check.Size = new System.Drawing.Size(15, 18);
 			this.lastName_check.TabIndex = 6;
 			this.lastName_check.TabStop = false;
 			this.lastName_check.UseVisualStyleBackColor = true;
@@ -777,7 +701,7 @@
 			this.middleName_search.Location = new System.Drawing.Point(99, 51);
 			this.middleName_search.MaxLength = 20;
 			this.middleName_search.Name = "middleName_search";
-			this.middleName_search.Size = new System.Drawing.Size(136, 20);
+			this.middleName_search.Size = new System.Drawing.Size(180, 20);
 			this.middleName_search.TabIndex = 2;
 			// 
 			// birthDate_search
@@ -816,9 +740,9 @@
 			// 
 			this.country_check.AutoSize = true;
 			this.country_check.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.country_check.Location = new System.Drawing.Point(241, 123);
+			this.country_check.Location = new System.Drawing.Point(285, 123);
 			this.country_check.Name = "country_check";
-			this.country_check.Size = new System.Drawing.Size(16, 18);
+			this.country_check.Size = new System.Drawing.Size(15, 18);
 			this.country_check.TabIndex = 46;
 			this.country_check.TabStop = false;
 			this.country_check.UseVisualStyleBackColor = true;
@@ -827,9 +751,9 @@
 			// 
 			this.city_check.AutoSize = true;
 			this.city_check.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.city_check.Location = new System.Drawing.Point(241, 147);
+			this.city_check.Location = new System.Drawing.Point(285, 147);
 			this.city_check.Name = "city_check";
-			this.city_check.Size = new System.Drawing.Size(16, 18);
+			this.city_check.Size = new System.Drawing.Size(15, 18);
 			this.city_check.TabIndex = 47;
 			this.city_check.TabStop = false;
 			this.city_check.UseVisualStyleBackColor = true;
@@ -840,7 +764,7 @@
 			this.country_search.Location = new System.Drawing.Point(99, 123);
 			this.country_search.MaxLength = 20;
 			this.country_search.Name = "country_search";
-			this.country_search.Size = new System.Drawing.Size(136, 20);
+			this.country_search.Size = new System.Drawing.Size(180, 20);
 			this.country_search.TabIndex = 5;
 			// 
 			// city_search
@@ -849,13 +773,13 @@
 			this.city_search.Location = new System.Drawing.Point(99, 147);
 			this.city_search.MaxLength = 20;
 			this.city_search.Name = "city_search";
-			this.city_search.Size = new System.Drawing.Size(136, 20);
+			this.city_search.Size = new System.Drawing.Size(180, 20);
 			this.city_search.TabIndex = 6;
 			// 
 			// anything_check
 			// 
 			this.anything_check.AutoSize = true;
-			this.anything_check.Location = new System.Drawing.Point(231, 190);
+			this.anything_check.Location = new System.Drawing.Point(278, 190);
 			this.anything_check.Name = "anything_check";
 			this.anything_check.Size = new System.Drawing.Size(15, 14);
 			this.anything_check.TabIndex = 48;
@@ -864,7 +788,7 @@
 			// 
 			// goSearch_button
 			// 
-			this.goSearch_button.Location = new System.Drawing.Point(260, 185);
+			this.goSearch_button.Location = new System.Drawing.Point(301, 185);
 			this.goSearch_button.Name = "goSearch_button";
 			this.goSearch_button.Size = new System.Drawing.Size(75, 23);
 			this.goSearch_button.TabIndex = 46;
@@ -878,18 +802,8 @@
 			this.anything_search.Location = new System.Drawing.Point(16, 187);
 			this.anything_search.MaxLength = 20;
 			this.anything_search.Name = "anything_search";
-			this.anything_search.Size = new System.Drawing.Size(209, 20);
+			this.anything_search.Size = new System.Drawing.Size(252, 20);
 			this.anything_search.TabIndex = 7;
-			// 
-			// listBox
-			// 
-			this.listBox.FormattingEnabled = true;
-			this.listBox.Location = new System.Drawing.Point(12, 214);
-			this.listBox.Name = "listBox";
-			this.listBox.Size = new System.Drawing.Size(325, 82);
-			this.listBox.TabIndex = 1;
-			this.listBox.TabStop = false;
-			this.listBox.SelectedIndexChanged += new System.EventHandler(this.listBox_Select);
 			// 
 			// openFileDialog
 			// 
@@ -901,7 +815,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
-			this.ClientSize = new System.Drawing.Size(349, 602);
+			this.ClientSize = new System.Drawing.Size(393, 610);
 			this.Controls.Add(this.splitContainer);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.MaximizeBox = false;
@@ -915,9 +829,9 @@
 			this.splitContainer.Panel2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
 			this.splitContainer.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataTable)).EndInit();
 			this.main_table.ResumeLayout(false);
 			this.main_table.PerformLayout();
-			this.navigation_panel.ResumeLayout(false);
 			this.andor_table.ResumeLayout(false);
 			this.andor_table.PerformLayout();
 			this.search_table.ResumeLayout(false);
@@ -946,16 +860,10 @@
         private System.Windows.Forms.TextBox lastName_box;
         private System.Windows.Forms.Label middleName_label;
         private System.Windows.Forms.Label lastName_label;
-        private System.Windows.Forms.Button previousPosition_button;
-        private System.Windows.Forms.Button firstPosition_button;
-        private System.Windows.Forms.Panel navigation_panel;
-        private System.Windows.Forms.Button lastPosition_button;
-        private System.Windows.Forms.Button nextPosition_button;
         private System.Windows.Forms.Button cancel_button;
         private System.Windows.Forms.Button ok_button;
         private System.Windows.Forms.MaskedTextBox birthDate_box;
         private System.Windows.Forms.Label page_label;
-        private System.Windows.Forms.ListBox listBox;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.TextBox firstName_search;
         private System.Windows.Forms.TextBox middleName_search;
@@ -996,8 +904,7 @@
 		private System.Windows.Forms.TextBox email_box;
 		private System.Windows.Forms.TextBox website_box;
 		private System.Windows.Forms.TextBox comment_box;
-		private System.Windows.Forms.Button restore_button;
-		private System.Windows.Forms.CheckBox includeDeleted_check;
+		private System.Windows.Forms.DataGridView dataTable;
 	}
 }
 

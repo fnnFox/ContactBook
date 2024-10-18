@@ -1,20 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Printing;
-using System.IO;
-using System.IO.Pipes;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.OleDb;
+using System.Data;
 
 namespace ContactBook
 {
@@ -28,20 +15,10 @@ namespace ContactBook
 		/// 1 = Edit Mode
 		/// </summary>
 		bool Mode;
-		bool IsAnyDeleted = false;
 
-		int TotalBlocks;
-		int Maximum;
-		int CurrentBlock;
-		int DataBegin = 32 * SymbolSize; 
-
-		FileStream fileStream;
-		
-		static int BlockSize = Record.blockSize;
-		static int SymbolSize = Record.symbolSize;
+		OleDbConnection db = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Database.mdb");
 
 		Record CurrentRecord;
-		List<(Record record, int index)> SearchResult; 
 
 		public ContactBook()
 		{
@@ -49,7 +26,6 @@ namespace ContactBook
 			CollapsedPanelHeight = splitContainer.Panel2.Height;
 			Height -= CollapsedPanelHeight;
 			splitContainer.Panel2Collapsed = true;
-			this.FormClosing += Notebook_Saving;
 
 			this.firstName_search.TextChanged += searchBox_update;
 			this.lastName_search.TextChanged += searchBox_update;
@@ -75,17 +51,11 @@ namespace ContactBook
 
 			CurrentRecord = new Record();
 
-			fileStream = new FileStream(FilePath, FileMode.OpenOrCreate);
-			fileStream.Seek(DataBegin, SeekOrigin.Begin);
-			byte[] sizeCheck = new byte[BlockSize];
-			while (fileStream.Read(sizeCheck, 0, BlockSize) >= BlockSize)
-			{
-				if (sizeCheck[0] == 1)
-					IsAnyDeleted = true;
-
-				TotalBlocks++;
-			}
-			Maximum = TotalBlocks;
+			db.Open();
+			OleDbCommand command = new OleDbCommand(
+				"SELECT COUNT(*) FROM contacts", db);
+			int TotalBlocks = (int)command.ExecuteScalar();
+			db.Close();
 
 			if (TotalBlocks == 0)
 			{
@@ -93,11 +63,7 @@ namespace ContactBook
 			}
 			else
 			{
-				byte[] lastBlockOpened = new byte[SymbolSize];
-				fileStream.Seek(0, SeekOrigin.Begin);
-				fileStream.Read(lastBlockOpened, 0, SymbolSize);
-				CurrentBlock = BitConverter.ToInt16(lastBlockOpened, 0);
-				readBlock();
+				updateDataGrid();
 				updateBoxes();
 			}
 		}
@@ -166,7 +132,6 @@ namespace ContactBook
 		private void edit_button_Click(object sender, EventArgs e)
 		{
 			Mode = true;
-
 			editMode(true);
 		}
 		private void ok_button_Click(object sender, EventArgs e)
@@ -176,6 +141,7 @@ namespace ContactBook
 			/////////////////
 
 			CurrentRecord = new Record(
+				CurrentRecord.id,
 				firstName_box.Text,
 				lastName_box.Text,
 				middleName_box.Text,
@@ -187,26 +153,26 @@ namespace ContactBook
 				website_box.Text,
 				comment_box.Text
 			);
-
 			if (!checkIsEmpty(CurrentRecord))
 			{
 				if (!checkForDubs(CurrentRecord))
 				{
+					db.Open();
+					OleDbCommand command;
 					if (!Mode)
 					{
-						CurrentBlock = TotalBlocks;
-						fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
-						TotalBlocks++;
+						command = new OleDbCommand("insert into contacts (firstName,lastName,middleName,birthDate,phoneNumber,country,city,email,website,comment) values (?,?,?,?,?,?,?,?,?,?)", db);
+						CurrentRecord.AddAllParams(ref command);
 					}
-
-					fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
-					byte[] bytes = CurrentRecord.Serialize2Byte();
-					fileStream.Write(bytes, 0, BlockSize);
-					fileStream.Flush();
+					else
+					{
+						command = new OleDbCommand($"update contacts set {CurrentRecord.ToQuery()} where id={CurrentRecord.id}", db);
+					}
+					command.ExecuteNonQuery();
+					db.Close();
 
 					editMode(false);
-
-					readBlock();
+					updateDataGrid();
 					updateBoxes();
 				}
 				else
@@ -221,129 +187,37 @@ namespace ContactBook
 		}
 		private void cancel_button_Click(object sender, EventArgs e)
 		{
-			/*foreach (Control control in mainTable.Controls)
-			{
-				if (control is TextBox || control is MaskedTextBox)
-					control.Enabled = false;
-			}*/
 			editMode(false);
 			updateBoxes();
 		}
 		private void delete_button_Click(object sender, EventArgs e)
 		{
-			fileStream.Seek(CurrentBlock * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-			fileStream.WriteByte(1);
-			fileStream.Flush();
-			CurrentBlock += CurrentBlock == 0 ? +1 : -1;
-			//TotalBlocks--;
-			IsAnyDeleted = true;
-			readBlock();
+			db.Open();
+			OleDbCommand command = new OleDbCommand($"delete from contacts where id={CurrentRecord.id}",db);
+			command.ExecuteNonQuery();
+			db.Close();
+			updateDataGrid();
+			listBox_Select(dataTable, null);
 			updateBoxes();
 		}
 		private void goSearch_button_Click(object sender, EventArgs e)
 		{
-			SearchResult = makeList();
-			listBox.Items.Clear();
-			foreach (var i in SearchResult)
+			db.Open();
+			OleDbCommand command = new OleDbCommand(makeSearchQuery(), db);
+			OleDbDataAdapter adapter = new OleDbDataAdapter(command);
+			DataTable table = new DataTable();
+			adapter.Fill(table);
+			dataTable.DataSource = table;
+			if (dataTable.Columns.Contains("id"))
 			{
-				listBox.Items.Add((i.index + 1) + ".  " + i.record.ToString());
+				dataTable.Columns["id"].Visible = false;
 			}
+			db.Close();
 		}
-		private void restore_button_Click(object sender, EventArgs e)
-		{
-			CurrentRecord.isDeleted = false;
-			fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
-			fileStream.Write(CurrentRecord.Serialize2Byte(), 0, BlockSize);
-			restore_button.Enabled = false;
-		}
-		
-		#endregion
 
-		#region Navigation
-		private void firstPosition_button_Click(object sender, EventArgs e)
-		{
-			int tempPos = 0;
-			while (tempPos < TotalBlocks - 1)
-			{
-				fileStream.Seek(tempPos * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-				if (fileStream.ReadByte() == 0 || includeDeleted_check.Checked)
-				{
-					CurrentBlock = tempPos;
-					break;
-				}
-				tempPos++;
-			}
-			CurrentBlock = tempPos;
-			readBlock();
-			updateBoxes();
-		}
-		private void lastPosition_button_Click(object sender, EventArgs e)
-		{
-			int tempPos = TotalBlocks - 1;
-			while (tempPos > 0)
-			{
-				fileStream.Seek(tempPos * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-				if (fileStream.ReadByte() == 0 || includeDeleted_check.Checked)
-				{
-					CurrentBlock = tempPos;
-					break;
-				}
-				tempPos--;
-			}
-			CurrentBlock = tempPos;
-			readBlock();
-			updateBoxes();
-		}
-		private void nextPosition_button_Click(object sender, EventArgs e)
-		{
-			if (CurrentBlock < TotalBlocks - 1)
-			{
-				int tempPos = CurrentBlock + 1;
-				while (tempPos < TotalBlocks - 1)
-				{
-					fileStream.Seek(tempPos * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-					if (fileStream.ReadByte() == 0 || includeDeleted_check.Checked)
-					{
-						CurrentBlock = tempPos;
-						break;
-					}
-					tempPos++;
-				}
-				CurrentBlock = tempPos;
-			}
-			readBlock();
-			updateBoxes();
-		}
-		private void previousPosition_button_Click(object sender, EventArgs e)
-		{
-			if (CurrentBlock > 0)
-			{
-				int tempPos = CurrentBlock - 1;
-				while (tempPos > 0)
-				{
-					fileStream.Seek(tempPos * BlockSize + DataBegin + 1, SeekOrigin.Begin);
-					if (fileStream.ReadByte() == 0 || includeDeleted_check.Checked)
-					{
-						CurrentBlock = tempPos;
-						break;
-					}
-					tempPos--;
-				}
-				CurrentBlock = tempPos;
-			}
-			readBlock();
-			updateBoxes();
-		}
 		#endregion
 
 		#region Miscellaneous
-		private void readBlock()
-		{
-			byte[] block = new byte[BlockSize];
-			fileStream.Seek(CurrentBlock * BlockSize + DataBegin, SeekOrigin.Begin);
-			fileStream.Read(block, 0, BlockSize);
-			CurrentRecord = new Record(block);
-		}
 		private void updateBoxes()
 		{
 			firstName_box.Text = CurrentRecord.firstName;
@@ -357,31 +231,24 @@ namespace ContactBook
 			website_box.Text = CurrentRecord.website;
 			comment_box.Text = CurrentRecord.comment;
 
-			page_label.Text = $"{CurrentBlock+1}/{TotalBlocks}";
-
-			restore_button.Enabled = CurrentRecord.isDeleted;
+			page_label.Text = $"id = {CurrentRecord.id}";
 		}
-
-		// OLD
-		/*private bool findBlock()
+		private void updateDataGrid()
 		{
-			byte[] block = new byte[BlockSize];
-			int position = 0;
-			bool isDeleted = false;
-			fileStream.Position = 0;
-			while (fileStream.Read(block, 0, BlockSize) > 0)
+			db.Open();
+
+			OleDbCommand command = new OleDbCommand("SELECT * FROM contacts", db);
+			OleDbDataAdapter adapter = new OleDbDataAdapter(command);
+			DataTable table = new DataTable();
+			adapter.Fill(table);
+			dataTable.DataSource = table;
+			if (dataTable.Columns.Contains("id"))
 			{
-				if (block[0] == 1)
-				{
-					isDeleted = true;
-					break;
-				}
-				position++;
+				dataTable.Columns["id"].Visible = false;
 			}
-			CurrentBlock = position;
-			fileStream.Position = CurrentBlock * BlockSize;
-			return isDeleted;
-		}*/
+
+			db.Close();
+		}
 		private void addBlock()
 		{
 			Mode = false;
@@ -395,93 +262,47 @@ namespace ContactBook
 					textBox.Clear();
 				if (control is MaskedTextBox maskedTextBox)
 					maskedTextBox.Clear();
-				//if (control is DateTimePicker dateTimePicker)
-				//	dateTimePicker.Value = DateTime.Now;
 			}
-
-			Maximum++;
-			
-			//   MOVED TO ok_button_Click()   //
-			
-			//BlockPosition = Maximum;
-			//fileStream.Position = BlockPosition * BlockSize;
 		}
 		private void editMode(bool isEditModeOn)
 		{
 			add_button.Enabled = !isEditModeOn;
 			edit_button.Enabled = !isEditModeOn;
 			delete_button.Enabled = !isEditModeOn;
-			navigation_panel.Enabled = !isEditModeOn;
 			ok_button.Enabled = isEditModeOn;
 			ok_button.Visible = isEditModeOn;
 			cancel_button.Enabled = isEditModeOn;
 
 			foreach (Control control in main_table.Controls)
 			{
-				if (control is TextBox textBox)
-					textBox.ReadOnly = !isEditModeOn;
-
-				//if (control is DateTimePicker picker)
-				//	picker. = isEditModeOn;
-
-				if (control is MaskedTextBox maskedTextBox)
-					maskedTextBox.ReadOnly = !isEditModeOn;
+				if (control is TextBoxBase tbb)
+					tbb.ReadOnly = !isEditModeOn;
 			}
 		}
-		private void Notebook_Saving(object sender, FormClosingEventArgs e)
+
+		private void listBox_Select(object sender, DataGridViewCellEventArgs e)
 		{
-			byte[] lastBlockOpened = BitConverter.GetBytes(CurrentBlock);
-
-			if (IsAnyDeleted)
+			var c = (sender as DataGridView).CurrentRow.Cells;
+			if (c != null)
 			{
-				DialogResult dialogResult = MessageBox.Show("После закрытия программы будет невозможно восстановить удалённые записи. Закрыть?", "Внимание", MessageBoxButtons.YesNo);
-				if (dialogResult == DialogResult.Yes)
-				{
-					string tempPath = ".temp";
-					using (FileStream tempStream = new FileStream(tempPath, FileMode.Create))
-					{
-						fileStream.Seek(0, SeekOrigin.Begin);
-						tempStream.Seek(0, SeekOrigin.Begin);
-						tempStream.Write(lastBlockOpened, 0, SymbolSize);
-
-						byte[] block = new byte[BlockSize];
-
-						fileStream.Seek(DataBegin, SeekOrigin.Begin);
-						tempStream.Seek(DataBegin, SeekOrigin.Begin);
-						while (fileStream.Read(block, 0, BlockSize) >= BlockSize)
-						{
-							if (block[1] == 0)
-							{
-								tempStream.Write(block, 0, BlockSize);
-							}
-						}
-					}
-					fileStream.Close();
-					File.Delete(FilePath);
-					File.Move(tempPath, FilePath);
-				}
-				else if (dialogResult == DialogResult.No)
-				{
-					e.Cancel = true;
-					return;
-				}
+				CurrentRecord = new Record(
+								c["id"].Value.ToString(),
+								c["firstName"].Value.ToString(),
+								c["lastName"].Value.ToString(),
+								c["middleName"].Value.ToString(),
+								c["birthDate"].Value.ToString(),
+								c["phoneNumber"].Value.ToString(),
+								c["country"].Value.ToString(),
+								c["city"].Value.ToString(),
+								c["email"].Value.ToString(),
+								c["website"].Value.ToString(),
+								c["comment"].Value.ToString());
 			}
-			else
-			{
-				fileStream.Seek(0, SeekOrigin.Begin);
-				fileStream.Write(lastBlockOpened, 0, SymbolSize);
-				fileStream.Close();
-			}
-		}
-		private void listBox_Select(object sender, EventArgs e)
-		{
-			CurrentRecord = SearchResult[listBox.SelectedIndex].record;
-			CurrentBlock = SearchResult[listBox.SelectedIndex].index;
 			updateBoxes();
 		}
-		private List<(Record, int)> makeList()
+		private string makeSearchQuery()
 		{
-			List<(Record, int)> list = new List<(Record, int)>();
+			string query = "select * from contacts where ";
 
 			Record filter = new Record(
 								firstName_search.Text,
@@ -493,103 +314,74 @@ namespace ContactBook
 								city_search.Text
 			);
 
+			if (!anything_check.Checked) {
+				if (and.Checked)
+				{
+					if (firstName_check.Checked)
+						query += $"firstName like '%{filter.firstName}%' and ";
+					if (lastName_check.Checked)
+						query += $"lastName like '%{filter.lastName}%' and ";
+					if (middleName_check.Checked)
+						query += $"middleName like '%{filter.middleName}%' and ";
+					if (birthDate_check.Checked)
+						query += $"birthDate like '%{filter.birthDate}%' and ";
+					if (phoneNumber_check.Checked)
+						query += $"phoneNumber like '%{filter.phoneNumber}%' and ";
+					if (country_check.Checked)
+						query += $"country like '%{filter.country}%' and ";
+					if (city_check.Checked)
+						query += $"city like '%{filter.city}%' and ";
 
-			byte[] block = new byte[BlockSize];
-			fileStream.Seek(DataBegin, SeekOrigin.Begin);
-			int pos = 0;
-			while (fileStream.Read(block, 0, BlockSize) >= BlockSize)
-			{
-				Record rec = new Record(block);
-				if (rec.isDeleted && !includeDeleted_check.Checked) continue;
-				bool check;
-
-				if (!anything_check.Checked)
-					if (and.Checked)
-					{
-						check = true;
-
-						if (firstName_check.Checked && check)
-							check = rec.firstName.ToLower().Contains(filter.firstName.ToLower());
-						if (lastName_check.Checked && check)
-							check = rec.lastName.ToLower().Contains(filter.lastName.ToLower());
-						if (middleName_check.Checked && check)
-							check = rec.middleName.ToLower().Contains(filter.middleName.ToLower());
-						if (birthDate_check.Checked && check)
-							check = rec.birthDate.ToLower().Contains(filter.birthDate.ToLower());
-						if (phoneNumber_check.Checked && check)
-							check = rec.phoneNumber.ToLower().Contains(filter.phoneNumber.ToLower());
-						if (country_check.Checked && check)
-							check = rec.country.ToLower().Contains(filter.country.ToLower());
-						if (city_check.Checked && check)
-							check = rec.city.ToLower().Contains(filter.city.ToLower());
-					}
-					else
-					{
-						check = false;
-
-						if (firstName_check.Checked && !check)
-							check = rec.firstName.ToLower().Contains(filter.firstName.ToLower());
-						if (lastName_check.Checked && !check)
-							check = rec.lastName.ToLower().Contains(filter.lastName.ToLower());
-						if (middleName_check.Checked && !check)
-							check = rec.middleName.ToLower().Contains(filter.middleName.ToLower());
-						if (birthDate_check.Checked && !check)
-							check = rec.birthDate.ToLower().Contains(filter.birthDate.ToLower());
-						if (phoneNumber_check.Checked && !check)
-							check = rec.phoneNumber.ToLower().Contains(filter.phoneNumber.ToLower());
-						if (country_check.Checked && !check)
-							check = rec.country.ToLower().Contains(filter.country.ToLower());
-						if (city_check.Checked && !check)
-							check = rec.city.ToLower().Contains(filter.city.ToLower());
-					}
+					query = query.Substring(0, query.Length - " and ".Length);
+				}
 				else
 				{
-					check = false;
+					if (firstName_check.Checked)
+						query += $"firstName like '%{filter.firstName}%' or ";
+					if (lastName_check.Checked)
+						query += $"lastName like '%{filter.lastName}%' or ";
+					if (middleName_check.Checked)
+						query += $"middleName like '%{filter.middleName}%' or ";
+					if (birthDate_check.Checked)
+						query += $"birthDate like '%{filter.birthDate}%' or ";
+					if (phoneNumber_check.Checked)
+						query += $"phoneNumber like '%{filter.phoneNumber}%' or ";
+					if (country_check.Checked)
+						query += $"country like '%{filter.country}%' or ";
+					if (city_check.Checked)
+						query += $"city like '%{filter.city}%' or ";
 
-					string word = anything_search.Text;
-					if (!check)
-						check = rec.firstName.ToLower().Contains(word.ToLower());
-					if (!check)
-						check = rec.lastName.ToLower().Contains(word.ToLower());
-					if (!check)
-						check = rec.middleName.ToLower().Contains(word.ToLower());
-					if (!check)
-						check = rec.birthDate.ToLower().Contains(word.ToLower());
-					if (!check)
-						check = rec.phoneNumber.ToLower().Contains(word.ToLower());
-					if (!check)
-						check = rec.country.ToLower().Contains(word.ToLower());
-					if (!check)
-						check = rec.city.ToLower().Contains(word.ToLower());
+					query = query.Substring(0, query.Length - " or ".Length);
 				}
-
-				if (check)
-					list.Add((rec, pos));
-				pos++;
+				query += ";";
 			}
-			return list;
+			else
+			{
+				string str = anything_search.Text;
+				query +=
+					$"firstName like '%{str}%' or " +
+					$"lastName like '%{str}%' or " +
+					$"middleName like '%{str}%' or " +
+					$"birthDate like '%{str}%' or " +
+					$"phoneNumber like '%{str}%' or " +
+					$"country like '%{str}%' or " +
+					$"city like '%{str}%';";
+			}
+			return query;
 		}
 		private bool checkForDubs(Record filter)
 		{
-			byte[] block = new byte[BlockSize];
-			fileStream.Seek(DataBegin, SeekOrigin.Begin);
-			while (fileStream.Read(block, 0, BlockSize) >= BlockSize)
-			{
-				Record rec = new Record(block);
-				if (rec.isDeleted) continue;
+			int result = 0;
+			db.Open();
 
-				if (rec.firstName.ToLower().Equals(filter.firstName.ToLower()) &&
-					rec.lastName.ToLower().Equals(filter.lastName.ToLower()) &&
-					rec.middleName.ToLower().Equals(filter.middleName.ToLower()) &&
-					rec.birthDate.ToLower().Equals(filter.birthDate.ToLower()) &&
-					rec.phoneNumber.ToLower().Equals(filter.phoneNumber.ToLower()) &&
-					rec.country.ToLower().Equals(filter.country.ToLower()) &&
-					rec.city.ToLower().Equals(filter.city.ToLower()))
-				{
-					return true;
-				}
-			}
-			return false;
+			OleDbCommand command = new OleDbCommand(
+				"SELECT COUNT(*) FROM contacts WHERE id <> ? AND firstName = ? AND lastName = ? AND middleName = ? AND birthDate = ? AND phoneNumber = ? AND country = ? AND city = ?", db);
+
+			filter.AddAllParams(ref command);
+
+			result = (int)(command.ExecuteScalar());
+			db.Close();
+			return result > 0 ? true : false;
 		}
 		private bool checkIsEmpty(Record record)
 		{
@@ -601,17 +393,14 @@ namespace ContactBook
 				return true;
 			return false;
 		}
-
 		#endregion
-
-
 	}
 	public class Record
 	{
 		public static int symbolSize = 2;
 		public static int blockSize = (1 + 20 + 20 + 20 + 20 + 20 + 20 + 20 + 40 + 8 + 10) * symbolSize; // NEED TO FIX THIS MESS
 
-		public bool isDeleted = false;
+		public string id			{ get; private set; } = "1";
 		public string firstName		{ get; private set; }
 		public string lastName		{ get; private set; }
 		public string middleName	{ get; private set; }
@@ -624,8 +413,9 @@ namespace ContactBook
 		public string comment		{ get; private set; }
 
 		public Record() { }
-		public Record(string firstName, string lastName, string middleName, string birthDate, string phoneNumber, string country, string city, string email, string website, string comment)
+		public Record(string id, string firstName, string lastName, string middleName, string birthDate, string phoneNumber, string country, string city, string email, string website, string comment)
 		{
+			this.id = id;
 			this.firstName = firstName;
 			this.lastName = lastName;
 			this.middleName = middleName;
@@ -647,114 +437,33 @@ namespace ContactBook
 			this.country = country;
 			this.city = city;
 		}
-		public Record(byte[] byteArray)
+		public string ToQuery()
 		{
-			initFromByteArray(byteArray);
+			return
+				$"firstName='{firstName}'," +
+				$"lastName='{lastName}'," +
+				$"middleName='{middleName}'," +
+				$"birthDate='{birthDate}'," +
+				$"phoneNumber='{phoneNumber}'," +
+				$"country='{country}'," +
+				$"city='{city}'," +
+				$"email='{email}'," +
+				$"website='{website}'," +
+				$"comment='{comment}'";
 		}
-		public Record(ref FileStream fs)
+		public void AddAllParams(ref OleDbCommand command)
 		{
-			byte[] byteArray = new byte[blockSize];
-			fs.Read(byteArray, 0, blockSize);
-			initFromByteArray(byteArray);
-		}
-		public byte[] Serialize2Byte()
-		{
-			ByteEncodingStream stream = new ByteEncodingStream(blockSize, symbolSize);
-
-			stream.insert(isDeleted);
-			stream.insert(firstName, 20);
-			stream.insert(lastName, 20);
-			stream.insert(middleName, 20);
-			stream.insert(birthDate, 8);
-			stream.insert(phoneNumber, 10);
-			stream.insert(country, 20);
-			stream.insert(city, 20);
-			stream.insert(email, 20);
-			stream.insert(website, 20);
-			stream.insert(comment, 40);
-
-			return stream.getArray();
-		}
-		public override string ToString()
-		{
-			return	firstName + " " +
-					lastName + " " +
-					middleName;
-		}
-		private void initFromByteArray(byte[] byteArray)
-		{
-			ByteDecodingStream stream = new ByteDecodingStream(byteArray, symbolSize);
-			isDeleted = stream.getNextBool();
-			firstName = stream.getNextString(20);
-			lastName = stream.getNextString(20);
-			middleName = stream.getNextString(20);
-			birthDate = stream.getNextString(8);
-			phoneNumber = stream.getNextString(10);
-			country = stream.getNextString(20);
-			city = stream.getNextString(20);
-			email = stream.getNextString(20);
-			website = stream.getNextString(20);
-			comment = stream.getNextString(40);
-		}
-		private abstract class ByteEncoderStream
-		{
-			protected byte[] byteArray;
-			protected int symbolSize;
-			protected int position;
-			public bool ended { get; protected set; }
-			public bool getEnded()
-			{
-				ended = !(position < byteArray.Length / symbolSize);
-				return ended;
-			}
-		}
-		private class ByteDecodingStream : ByteEncoderStream
-		{
-			public ByteDecodingStream(byte[] byteArray, int symbolSize, int startPosition = 0)
-			{
-				this.symbolSize = symbolSize;
-				this.byteArray = byteArray;
-				this.ended = false;
-				this.position = startPosition;
-			}
-			public string getNextString(int length)
-			{
-				string output = Encoding.UTF8.GetString(byteArray, position * symbolSize, length * symbolSize).TrimEnd('\0');
-				position += length;
-				getEnded();
-				return output;
-			}
-			public bool getNextBool(int length = 1)
-			{
-				bool output = Encoding.UTF8.GetChars(byteArray, position * symbolSize, length * symbolSize)[symbolSize-1] != '\0';
-				position += length;
-				getEnded();
-				return output;
-			}
-		}
-		private class ByteEncodingStream : ByteEncoderStream
-		{
-			public ByteEncodingStream(int arraySize, int symbolSize, int startPosition = 0)
-			{
-				this.symbolSize = symbolSize;
-				this.byteArray = new byte[arraySize];
-				this.ended = false;
-				this.position = startPosition;
-			}
-			public void insert(string inputString, int offset)
-			{
-				Encoding.UTF8.GetBytes(inputString).CopyTo(byteArray, position * Record.symbolSize);
-				position += offset;
-				getEnded();
-			}
-			public void insert(bool boolean, int offset = 1)
-			{
-				this.insert((boolean ? 1 : 0).ToString(), offset);
-			}
-			public byte[] getArray()
-			{
-				return byteArray;
-			}
+			command.Parameters.AddWithValue("@id", id);
+			command.Parameters.AddWithValue("@firstName", firstName);
+			command.Parameters.AddWithValue("@lastName", lastName);
+			command.Parameters.AddWithValue("@middleName", middleName);
+			command.Parameters.AddWithValue("@birthDate", birthDate);
+			command.Parameters.AddWithValue("@phoneNumber", phoneNumber);
+			command.Parameters.AddWithValue("@country", country);
+			command.Parameters.AddWithValue("@city", city);
+			command.Parameters.AddWithValue("@email", email);
+			command.Parameters.AddWithValue("@website", website);
+			command.Parameters.AddWithValue("@comment", comment);
 		}
 	}
 }
