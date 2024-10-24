@@ -36,7 +36,7 @@ namespace ContactBook
 			this.city_check.CheckedChanged += searchBox_update;
 			this.anything_search.TextChanged += anything_search_update;
 			this.anything_check.CheckedChanged += anything_check_update;
-			
+
 			for (int row = 0; row < main_table.RowCount; row++)
 			{
 				if (main_table.GetControlFromPosition(0, row) is System.Windows.Forms.Label label)
@@ -182,7 +182,7 @@ namespace ContactBook
 			}
 			else
 			{
-				MessageBox.Show("Запись пуста", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show("Заполните необходимые поля", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 		private void cancel_button_Click(object sender, EventArgs e)
@@ -193,7 +193,7 @@ namespace ContactBook
 		private void delete_button_Click(object sender, EventArgs e)
 		{
 			db.Open();
-			OleDbCommand command = new OleDbCommand($"delete from contacts where id={CurrentRecord.id}",db);
+			OleDbCommand command = new OleDbCommand($"delete from contacts where id={CurrentRecord.id}", db);
 			command.ExecuteNonQuery();
 			db.Close();
 			updateDataGrid();
@@ -282,7 +282,7 @@ namespace ContactBook
 
 		private void listBox_Select(object sender, DataGridViewCellEventArgs e)
 		{
-			var c = (sender as DataGridView).CurrentRow.Cells;
+			var c = (sender as DataGridView).CurrentRow?.Cells;
 			if (c != null)
 			{
 				CurrentRecord = new Record(
@@ -297,6 +297,10 @@ namespace ContactBook
 								c["email"].Value.ToString(),
 								c["website"].Value.ToString(),
 								c["comment"].Value.ToString());
+			}
+			else
+			{
+				CurrentRecord = new Record();
 			}
 			updateBoxes();
 		}
@@ -371,13 +375,14 @@ namespace ContactBook
 		}
 		private bool checkForDubs(Record filter)
 		{
-			int result = 0;
+			int result;
 			db.Open();
 
 			OleDbCommand command = new OleDbCommand(
 				"SELECT COUNT(*) FROM contacts WHERE id <> ? AND firstName = ? AND lastName = ? AND middleName = ? AND birthDate = ? AND phoneNumber = ? AND country = ? AND city = ?", db);
 
 			filter.AddAllParams(ref command);
+			command.Parameters.AddWithValue("@id", filter.id);
 
 			result = (int)(command.ExecuteScalar());
 			db.Close();
@@ -385,8 +390,8 @@ namespace ContactBook
 		}
 		private bool checkIsEmpty(Record record)
 		{
-			if (record.firstName.Length == 0 &&
-				record.lastName.Length == 0 &&
+			if (( record.firstName.Length == 0 ||
+				record.lastName.Length == 0 ) &&
 				record.middleName.Length == 0 &&
 				record.birthDate.Length == 0 &&
 				record.phoneNumber.Length == 0)
@@ -397,9 +402,6 @@ namespace ContactBook
 	}
 	public class Record
 	{
-		public static int symbolSize = 2;
-		public static int blockSize = (1 + 20 + 20 + 20 + 20 + 20 + 20 + 20 + 40 + 8 + 10) * symbolSize; // NEED TO FIX THIS MESS
-
 		public string id			{ get; private set; } = "1";
 		public string firstName		{ get; private set; }
 		public string lastName		{ get; private set; }
@@ -453,7 +455,6 @@ namespace ContactBook
 		}
 		public void AddAllParams(ref OleDbCommand command)
 		{
-			command.Parameters.AddWithValue("@id", id);
 			command.Parameters.AddWithValue("@firstName", firstName);
 			command.Parameters.AddWithValue("@lastName", lastName);
 			command.Parameters.AddWithValue("@middleName", middleName);
