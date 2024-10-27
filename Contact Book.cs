@@ -624,7 +624,7 @@ namespace ContactBook
 		public string comment		{ get; private set; }
 
 		public Record() { }
-		public Record(string firstName, string lastName, string middleName, string birthDate, string phoneNumber, string country, string city, string email, string website, string comment)
+		public Record(string firstName, string lastName, string middleName, string birthDate, string phoneNumber, string country, string city, string email = "", string website = "", string comment = "")
 		{
 			this.firstName = firstName;
 			this.lastName = lastName;
@@ -636,16 +636,6 @@ namespace ContactBook
 			this.email = email;
 			this.website = website;
 			this.comment = comment;
-		}
-		public Record(string firstName, string lastName, string middleName, string birthDate, string phoneNumber, string country, string city)
-		{
-			this.firstName = firstName;
-			this.lastName = lastName;
-			this.middleName = middleName;
-			this.birthDate = birthDate;
-			this.phoneNumber = phoneNumber;
-			this.country = country;
-			this.city = city;
 		}
 		public Record(byte[] byteArray)
 		{
